@@ -1,0 +1,87 @@
+# DrugBug local infra (PRD §6/§7/§13/§19).
+#
+# Brings up the Inference Service's datastores + the service itself:
+#   - postgres  : static medical knowledge base (DDInter, TWOSIDES, RxNorm class,
+#                 pill reference, CPIC). ETL ingests into this (see infra/README.md).
+#   - redis     : scan/inference job queue + cache.
+#   - inference : the Python FastAPI service, built from ../inference (lightweight
+#                 boot image; gated capabilities report "unavailable" in /health).
+#
+# The SpacetimeDB module and the Next.js client are run separately (the module via
+# `spacetime start` / `spacetime publish`, the client via `npm run dev`) — see the
+# root README quickstart. Compose only owns the datastores + inference service.
+#
+# Run from this directory:  docker compose up -d
+# Env: docker compose reads ../inference/.env via env_file below. The default
+# POSTGRES_URL / REDIS_URL in that file point at the service names defined here when
+# the inference container runs inside this network; override the host to "localhost"
+# when running uvicorn on the host against these containers.
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: drugbug
+      POSTGRES_PASSWORD: drugbug
+      POSTGRES_DB: drugbug_kb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U drugbug -d drugbug_kb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  inference:
+    build:
+      context: ../inference
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../inference/.env
+    # Point the service at the compose-network datastore hostnames (override the
+    # localhost defaults baked into .env). Everything else comes from .env.
+    environment:
+      POSTGRES_URL: postgresql://drugbug:drugbug@postgres:5432/drugbug_kb
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    # --- GPU runtime for training (optional) ---
+    # The default image is CPU-only and serving is CPU-cheap. To TRAIN the GNN / pill
+    # models (PRD §11/§21) you need a CUDA GPU. Either run the training scripts on a
+    # rented/Colab/local-RTX GPU box, or build a derived CUDA image and add a GPU
+    # reservation here (requires the NVIDIA Container Toolkit on the host), e.g.:
+    #   deploy:
+    #     resources:
+    #       reservations:
+    #         devices:
+    #           - driver: nvidia
+    #             count: 1
+    #             capabilities: [gpu]
+    # A Claude subscription is not training compute.
+
+volumes:
+  pgdata:
+  redisdata:

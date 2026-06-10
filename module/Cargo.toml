@@ -1,0 +1,21 @@
+[package]
+name = "drugbug-module"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# `unstable` enables `client_visibility_filter` (Row-Level Security). NOTE: as of
+# spacetimedb 2.4.1 the RLS read-path is still being implemented upstream and is
+# not yet enforced at runtime — see module/README.md "Security note". The filters
+# in src/rls.rs are correct and become enforcing as the platform lands RLS;
+# write-path authorization (auth.rs) is fully enforced today.
+spacetimedb = { version = "2.4", features = ["unstable"] }
+log = "0.4"
+# Date arithmetic for dose-horizon materialization. No `clock` feature: the module
+# never reads the host clock directly (it uses `ctx.timestamp`), so this builds
+# cleanly to wasm32-unknown-unknown.
+chrono = { version = "0.4", default-features = false, features = ["alloc"] }

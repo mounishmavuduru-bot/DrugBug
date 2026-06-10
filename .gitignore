@@ -1,0 +1,61 @@
+# DrugBug — root .gitignore (monorepo: client / module / inference / infra).
+
+# ---- env / secrets ----
+.env
+.env.*
+!.env.example
+!client/.env.local.example
+
+# ---- node / Next.js (client) ----
+node_modules/
+.pnp
+.pnp.*
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---- Rust / SpacetimeDB module ----
+target/
+**/*.wasm          # compiled module artifacts (wasm32-unknown-unknown)
+*.wasm
+
+# ---- Python / inference ----
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- datastores / infra (docker volumes, local data) ----
+pgdata/
+redisdata/
+
+# ---- model weights + ML artifacts (GPU-trained; never committed) ----
+weights/
+checkpoints/
+*.pt
+*.pth
+*.onnx
+*.safetensors
+trocr_imprint/
+embeddings.jsonl
+graph.pt
+cascades.jsonl
+/tmp/drugbug-artifacts/
+/tmp/drugbug-adherence/
+
+# ---- agent / tooling scratch ----
+ruvector.db
+agentdb.rvf
+agentdb.rvf.lock
+
+# ---- os / editor ----
+.DS_Store
+*.pem
+*.log
+.vercel

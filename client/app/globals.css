@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/* DrugBug design system — PRD §17. Medical-grade trust, Linear-app polish.
+   Dark, dense, no cute health-app styling. */
+
+@theme {
+  /* Palette (PRD §17) */
+  --color-background: #0a0e1a;
+  --color-surface: #0f1729;
+  --color-elevated: #1a2236;
+  --color-primary: #06b6d4;
+  --color-primary-foreground: #04222a;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-text: #f1f5f9;
+  --color-muted: #94a3b8;
+  --color-border: #1e293b;
+
+  /* Severity scale for CascadeMap edges / interaction badges */
+  --color-sev-monitor: #f59e0b; /* yellow  — monitor */
+  --color-sev-caution: #f97316; /* orange  — caution */
+  --color-sev-contra: #ef4444;  /* red     — contraindicated */
+
+  /* Type (PRD §17): Inter display/body, JetBrains Mono for drug names + doses */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius: 0.625rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.011em;
+  }
+  h1, h2, h3, h4 {
+    font-weight: 600;
+    letter-spacing: -0.02em; /* PRD §17 display tracking */
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+}
+
+@layer utilities {
+  .transition-fast { transition: all 150ms ease-out; }
+  .mono { font-family: var(--font-mono); }
+  .surface { background-color: var(--color-surface); }
+  .elevated { background-color: var(--color-elevated); }
+}

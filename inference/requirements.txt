@@ -1,0 +1,49 @@
+# ============================================================================
+# DrugBug Inference Service dependencies
+#
+# The service BOOTS with only the lightweight deps below. Heavy ML deps are
+# imported LAZILY inside their model modules and guarded with try/except, so the
+# app starts (and /health reports them "unavailable") even when they're absent.
+# ============================================================================
+
+# ---- Lightweight runtime (required to boot) ----
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+httpx==0.28.1
+pydantic==2.10.4
+anthropic==0.42.0
+numpy==2.2.1
+scipy==1.15.0
+scikit-learn==1.6.0
+psycopg[binary]==3.2.3
+redis==5.2.1
+pillow==11.1.0
+python-multipart==0.0.20
+
+# ---- Optional: object storage (S3/R2). Falls back to local dir when absent. ----
+# boto3==1.35.92
+
+# ============================================================================
+# Heavy ML deps — install ONLY where the corresponding capability is needed.
+# They are NOT required to boot. GPU notes in README.
+# ============================================================================
+#
+#   # Cascade GNN (training: GPU; serving: CPU)
+#   torch==2.5.1
+#   torch-geometric==2.6.1
+#
+#   # Pill detection (layer 1) — choose one backend
+#   ultralytics==8.3.55           # YOLO
+#   # detectron2 (install from source per its docs; pinned to your torch/CUDA)
+#
+#   # Imprint OCR (layer 2)
+#   transformers==4.47.1          # TrOCR
+#
+#   # Pill embedder (layer 3)
+#   torchvision==0.20.1
+#
+#   # Barcode / GS1 DataMatrix decode (counterfeit layer 1) — native libs:
+#   #   macOS:  brew install libdmtx zbar
+#   #   debian: apt-get install libdmtx0b libzbar0
+#   pylibdmtx==0.1.10
+#   pyzbar==0.1.9

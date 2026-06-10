@@ -1,0 +1,16 @@
+{
+  "name": "DrugBug — Medication safety",
+  "short_name": "DrugBug",
+  "description": "Reminders, interaction-cascade detection, pill verification, and pharmacogenomic personalization.",
+  "id": "/",
+  "start_url": "/today",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0E1A",
+  "theme_color": "#0A0E1A",
+  "categories": ["medical", "health", "productivity"],
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
