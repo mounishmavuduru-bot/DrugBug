@@ -37,18 +37,21 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-/** Wordmark — capsule mark + name set in the editorial display serif. */
+/** Wordmark — the pill-bug mark + name set in Poppins. */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <Link href="/today" className={cn("flex items-center gap-2", className)} aria-label="DrugBug home">
-      <svg width="22" height="22" viewBox="0 0 512 512" aria-hidden="true">
-        <g transform="translate(256 256) rotate(-38)">
-          <rect x="-150" y="-70" width="300" height="140" rx="70" fill="#15402e" />
-          <path d="M -150 0 a 70 70 0 0 1 70 -70 L 0 -70 L 0 70 L -80 70 a 70 70 0 0 1 -70 -70 Z" fill="#fbf8f0" />
-          <line x1="0" y1="-70" x2="0" y2="70" stroke="#15402e" strokeWidth="9" />
-        </g>
+      <svg width="26" height="26" viewBox="0 0 512 512" aria-hidden="true">
+        <clipPath id="wm-cap"><rect x="206" y="164" width="100" height="266" rx="50" /></clipPath>
+        <path d="M210 252 C 156 244 126 300 150 348 C 164 376 196 366 214 326 Z" fill="#272624" />
+        <path d="M302 252 C 356 244 386 300 362 348 C 348 376 316 366 298 326 Z" fill="#272624" />
+        <path d="M232 172 C 214 122 212 98 226 82" fill="none" stroke="#272624" strokeWidth="22" strokeLinecap="round" />
+        <path d="M280 172 C 298 122 300 98 286 82" fill="none" stroke="#272624" strokeWidth="22" strokeLinecap="round" />
+        <g clipPath="url(#wm-cap)"><rect x="206" y="164" width="100" height="140" fill="#9b1e4d" /></g>
+        <rect x="198" y="156" width="116" height="282" rx="58" fill="none" stroke="#272624" strokeWidth="22" />
+        <line x1="208" y1="300" x2="304" y2="300" stroke="#272624" strokeWidth="18" strokeLinecap="round" />
       </svg>
-      <span className="font-display text-xl tracking-tight text-ink">DrugBug</span>
+      <span className="font-display text-xl font-semibold tracking-tight text-ink">DrugBug</span>
     </Link>
   );
 }

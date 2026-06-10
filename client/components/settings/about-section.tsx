@@ -25,7 +25,7 @@ export function AboutSection() {
     <section className="space-y-3" aria-labelledby="about-heading">
       <h2
         id="about-heading"
-        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-faint"
+        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-muted"
       >
         About
       </h2>

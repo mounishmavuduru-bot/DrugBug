@@ -198,7 +198,7 @@ export default function MedDetailPage() {
 
       {/* Monograph masthead — the drug name is the one dominant element. */}
       <header className="border-b border-rule-strong pb-5">
-        <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+        <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-muted">
           {med.isOtc ? "Over the counter" : "Prescription"}
           {med.prn ? " · as needed" : ""}
           {!med.active ? " · inactive" : ""}
@@ -217,7 +217,7 @@ export default function MedDetailPage() {
               </>
             ) : null}
             {med.rxnormCode ? (
-              <span className="ml-2 label-mono text-faint">RxCUI {med.rxnormCode}</span>
+              <span className="ml-2 label-mono text-muted">RxCUI {med.rxnormCode}</span>
             ) : null}
           </p>
         ) : null}
@@ -261,7 +261,7 @@ export default function MedDetailPage() {
           divided by a rule rather than boxed into a second stat card. */}
       <div className="flex items-stretch gap-5 border-t border-rule pt-4">
         <div className="min-w-0 flex-1">
-          <p className="label-mono text-[11px] uppercase tracking-[0.12em] text-faint">
+          <p className="label-mono text-[11px] uppercase tracking-[0.12em] text-muted">
             On time, last 7 days
           </p>
           {adh ? (
@@ -277,9 +277,9 @@ export default function MedDetailPage() {
         </div>
         <div className="w-px shrink-0 bg-rule" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="label-mono text-[11px] uppercase tracking-[0.12em] text-faint">Last taken</p>
+          <p className="label-mono text-[11px] uppercase tracking-[0.12em] text-muted">Last taken</p>
           <p className="mt-1.5 text-sm text-ink">{last ? relativeTo(last) : "Never"}</p>
-          {last ? <p className="label-mono text-[11px] text-faint tnum">{clockTime(last)}</p> : null}
+          {last ? <p className="label-mono text-[11px] text-muted tnum">{clockTime(last)}</p> : null}
         </div>
       </div>
 
@@ -458,7 +458,7 @@ export default function MedDetailPage() {
               >
                 <div className="min-w-0">
                   <p className="text-sm text-ink">{e.symptom}</p>
-                  <p className="label-mono text-[11px] text-faint">{relativeTo(tsToDate(e.loggedAt))}</p>
+                  <p className="label-mono text-[11px] text-muted">{relativeTo(tsToDate(e.loggedAt))}</p>
                 </div>
                 <Badge variant={e.severity >= 4 ? "danger" : e.severity >= 3 ? "caution" : "neutral"}>
                   Severity {e.severity}
@@ -469,7 +469,7 @@ export default function MedDetailPage() {
         )}
       </Section>
 
-      {!dosesReady ? <p className="text-center text-[11px] text-faint">Syncing dose history</p> : null}
+      {!dosesReady ? <p className="text-center text-[11px] text-muted">Syncing dose history</p> : null}
 
       {me ? (
         <>
@@ -504,7 +504,7 @@ function Section({
   return (
     <section className="border-t border-rule pt-5">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">{label}</h2>
+        <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-muted">{label}</h2>
         {aside ?? null}
       </div>
       <div className="mt-3">{children}</div>
@@ -515,7 +515,7 @@ function Section({
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <dt className="label-mono text-[11px] uppercase tracking-[0.12em] text-faint">{label}</dt>
+      <dt className="label-mono text-[11px] uppercase tracking-[0.12em] text-muted">{label}</dt>
       <dd className={cn("mt-0.5 text-sm text-ink", mono && "label-mono")}>{value || "—"}</dd>
     </div>
   );

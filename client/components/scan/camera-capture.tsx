@@ -123,7 +123,7 @@ export function CameraCapture({
             type="button"
             onClick={stop}
             aria-label="Stop camera"
-            className="absolute right-2 top-2 rounded-[var(--radius-pill)] bg-ink/70 p-1.5 text-paper transition-colors duration-150 ease-[var(--ease)] hover:bg-ink"
+            className="absolute right-2 top-2 rounded-[var(--radius-pill)] bg-ink/80 p-1.5 text-card transition-colors duration-150 ease-[var(--ease)] hover:bg-ink"
           >
             <X className="size-4" aria-hidden />
           </button>

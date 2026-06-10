@@ -20,7 +20,7 @@ export function CaregiverEntry({
     <section className="space-y-3" aria-labelledby="caregivers-heading">
       <h2
         id="caregivers-heading"
-        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-faint"
+        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-muted"
       >
         Caregivers
       </h2>

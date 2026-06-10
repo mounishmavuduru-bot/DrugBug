@@ -37,21 +37,21 @@ export function RefillStrip({ meds }: { meds: readonly Medication[] }) {
     <section aria-label="Refills running low" className="space-y-3">
       <div className="flex items-center gap-2">
         <PackageOpen className="size-4 text-monitor" strokeWidth={1.75} aria-hidden />
-        <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+        <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-muted">
           Running low
         </h2>
       </div>
-      <ul className="border-t border-rule-strong">
+      <ul className="overflow-hidden rounded-[var(--radius-md)] border border-rule bg-card">
         {low.map(({ med, days }) => {
           const href = refillHref(med);
           return (
             <li
               key={med.medId.toString()}
-              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-rule py-3"
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-rule px-4 py-3 last:border-b-0"
             >
               <div className="min-w-0 flex-1">
                 <p className="label-mono truncate text-sm text-ink">{med.name}</p>
-                <p className="label-mono truncate text-xs text-faint">
+                <p className="label-mono truncate text-xs text-muted">
                   <span className="tnum">{med.dosesRemaining}</span> doses left
                   {med.pharmacy ? ` · ${med.pharmacy}` : ""}
                 </p>

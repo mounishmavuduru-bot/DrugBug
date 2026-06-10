@@ -9,6 +9,7 @@ import { toTs } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { LoadingState, ErrorState } from "@/components/shared/states";
+import { Wordmark } from "@/components/app/nav";
 
 /**
  * Real onboarding (PRD §4): the user creates their own account/profile. No
@@ -105,7 +106,8 @@ export default function WelcomePage() {
   if (!linkUp && connectTimedOut) {
     return (
       <main className="grid min-h-dvh place-items-center px-4">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm space-y-6">
+          <Wordmark className="justify-center" />
           <ErrorState
             title="Can't reach the record"
             description="We couldn't connect to the DrugBug server. Check your network and try again."
@@ -120,7 +122,8 @@ export default function WelcomePage() {
   if (!linkUp || profile) {
     return (
       <main className="grid min-h-dvh place-items-center px-4">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm space-y-6">
+          <Wordmark className="justify-center" />
           <LoadingState rows={3} label="Connecting to your record…" />
         </div>
       </main>
@@ -130,16 +133,15 @@ export default function WelcomePage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
       <header className="border-b border-rule-strong pb-6">
-        <div className="flex items-baseline justify-between gap-3 border-b border-rule pb-2">
-          <p className="label-mono text-[13px] font-semibold tracking-[0.16em] text-brand">
-            DrugBug
-          </p>
+        <div className="flex items-center justify-between gap-3 border-b border-rule pb-3">
+          <Wordmark />
           <p className="label-mono text-[10px] uppercase tracking-[0.14em] text-faint">
             New record
           </p>
         </div>
         <h1 className="mt-5 font-display text-[2rem] leading-[1.15] tracking-[-0.01em] text-ink">
-          Start your medication record
+          Start your medication{" "}
+          <span className="whitespace-nowrap border-b-[3px] border-brand">record</span>
         </h1>
         <p className="mt-3 max-w-[34ch] text-[15px] leading-relaxed text-muted">
           DrugBug holds every medication you take in one place and checks a new one

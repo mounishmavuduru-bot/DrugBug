@@ -133,7 +133,7 @@ export function DrugAutocomplete({
       {open ? (
         <div
           role="listbox"
-          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-[var(--radius-md)] border border-rule-strong bg-card shadow-[0_18px_44px_-22px_rgba(24,19,13,0.4)]"
+          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-[var(--radius-md)] border border-rule-strong bg-card"
         >
           {failed ? (
             <p className="px-3 py-2 text-xs text-muted">

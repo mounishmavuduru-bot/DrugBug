@@ -68,10 +68,12 @@ export default function CascadePage() {
     <div className="space-y-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+          <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-brand">
             Interaction map
           </span>
-          <h1 className="mt-1 text-3xl">Cascade</h1>
+          <h1 className="mt-1 text-3xl">
+            <span className="border-b-2 border-brand pb-0.5">Cascade</span>
+          </h1>
           <p className="mt-1 max-w-md text-sm text-muted">
             How your medications interact, and which combinations of three or more
             raise risk that a pair-by-pair check would miss.
@@ -144,7 +146,7 @@ export default function CascadePage() {
         <>
           {/* Tally — a clinical count line; the cascade figure carries the weight. */}
           <dl className="grid grid-cols-3 divide-x divide-rule overflow-hidden rounded-[var(--radius-md)] border border-rule bg-card">
-            <Tally n={activeMeds.length} label="On your list" />
+            <Tally n={activeMeds.length} label="On your list" tone="text-brand" />
             <Tally
               n={pairs.length}
               label={`Interacting pair${pairs.length === 1 ? "" : "s"}`}

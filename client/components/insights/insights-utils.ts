@@ -9,18 +9,19 @@ import { tsToDate } from "@/lib/format";
 export const WINDOW_DAYS = 30;
 
 /**
- * Deterministic categorical palette for per-med series, drawn from the Monograph
- * palette only — ink, pharmacy green, and the earthy clinical signal hues plus a
- * few muted neutrals. No rainbow, no neon, no violet/cyan. Index by a med's stable
- * position in the active list so colors don't reshuffle between renders.
+ * Deterministic categorical palette for per-med series, drawn from the DrugBug
+ * brand palette only — bug-head magenta first, then the earthy clinical signal
+ * hues plus a few muted neutrals. No rainbow, no neon, no violet/cyan. Index by a
+ * med's stable position in the active list so colors don't reshuffle between
+ * renders; the first (most-active) med always reads in the dominant magenta.
  */
 export const MED_PALETTE = [
-  "#15402e", // brand — deep pharmacy green
-  "#936410", // monitor — ochre
-  "#b5521e", // caution — burnt orange
-  "#2f6d4f", // positive — moss green
-  "#a32a1a", // danger — brick
-  "#6a6052", // muted — warm grey
+  "#9b1e4d", // brand — bug-head magenta (dominant)
+  "#98690f", // monitor — ochre
+  "#b8541b", // caution — burnt orange
+  "#237a4a", // positive — moss green
+  "#c01526", // danger — brick
+  "#6f5b62", // muted — warm grey
   "#7a5a2c", // brown
   "#4a5d3a", // olive
   "#8a4a3a", // clay

@@ -18,10 +18,10 @@ import { EmptyState } from "@/components/shared/states";
 import { MedLegend } from "@/components/insights/med-legend";
 import type { ScatterPoint } from "@/components/insights/insights-utils";
 
-// Monograph chart palette.
-const GRID = "#e0d7c4";
-const AXIS = "#6a6052";
-const UNATTRIBUTED_COLOR = "#938975"; // faint warm grey — no med attribution
+// Brand chart palette — hairline pink grid, muted axis on a white card.
+const GRID = "#f3d9e1";
+const AXIS = "#6f5b62";
+const UNATTRIBUTED_COLOR = "#a98e97"; // faint warm grey — no med attribution
 
 interface SeriesEntry {
   id: string;

@@ -29,7 +29,7 @@ export function PrivacySection() {
     <section className="space-y-3" aria-labelledby="privacy-heading">
       <h2
         id="privacy-heading"
-        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-faint"
+        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-muted"
       >
         Privacy and data
       </h2>

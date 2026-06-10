@@ -18,11 +18,11 @@ import { EmptyState } from "@/components/shared/states";
 import type { AdherencePoint } from "@/components/insights/insights-utils";
 import { overallAdherence } from "@/components/insights/insights-utils";
 
-// Monograph chart palette — ink/green on a warm paper card, hairline grid.
-const GRID = "#e0d7c4";
-const AXIS = "#6a6052";
-const LINE = "#15402e"; // brand — deep pharmacy green
-const TARGET = "#cabfa6"; // rule-strong — the 80% on-time reference line
+// Brand chart palette — magenta line on a white card, hairline pink grid.
+const GRID = "#f3d9e1"; // rule — hairline grid on white
+const AXIS = "#6f5b62"; // muted — axis labels (AA on white)
+const LINE = "#9b1e4d"; // brand — bug-head magenta, the primary series
+const TARGET = "#e6bccb"; // rule-strong — the 80% on-time reference line
 const ADHERENCE_TARGET = 80; // the on-time line clinicians tend to watch
 
 interface TooltipPayloadItem {

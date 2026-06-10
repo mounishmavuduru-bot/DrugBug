@@ -23,7 +23,7 @@ export function SeverityBadge({ severity }: { severity: string }) {
 /** Hex for react-flow edge styling — earthy clinical signals (matches the palette). */
 export function severityColor(severity: string): string {
   const s = severity.toLowerCase();
-  if (s.includes("contra") || s === "major") return "#a32a1a";
-  if (s.includes("caution") || s === "moderate") return "#b5521e";
-  return "#936410";
+  if (s.includes("contra") || s === "major") return "#c01526";
+  if (s.includes("caution") || s === "moderate") return "#b8541b";
+  return "#98690f";
 }

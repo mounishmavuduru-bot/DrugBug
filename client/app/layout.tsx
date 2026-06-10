@@ -1,30 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Poppins, Anonymous_Pro, Mulish } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-// Editorial serif display — distinctive, authoritative, not a sans-everywhere app.
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-// Clinical workhorse body — official, legible, deliberately not Inter.
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex-sans",
+// Display — Poppins (brand wordmark + headings).
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-// Prescription-label monospace for drug names, doses, NDC codes.
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
+// Body — Avenir is the brand face (loaded from the OS where present); Mulish is
+// the web-hostable fallback with near-identical humanist-geometric proportions.
+const mulish = Mulish({
+  variable: "--font-avenir-fallback",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+// Data / mono — Anonymous Pro (drug names, doses, NDC, codes).
+const anonymousPro = Anonymous_Pro({
+  variable: "--font-anonymous-pro",
+  subsets: ["latin"],
+  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DrugBug — know what you take",
     description:
-      "A medication record that catches dangerous drug combinations, verifies your pills, and reads your pharmacogenomics — built for people on more than one prescription.",
+      "A medication record that catches dangerous drug combinations, verifies your pills, and reads your pharmacogenomics.",
     siteName: "DrugBug",
     type: "website",
   },
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#15402e",
+  themeColor: "#9b1e4d",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -59,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${plexSans.variable} ${plexMono.variable} h-full`}
+      className={`${poppins.variable} ${mulish.variable} ${anonymousPro.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>

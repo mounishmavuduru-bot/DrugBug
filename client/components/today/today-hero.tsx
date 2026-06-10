@@ -48,7 +48,7 @@ export function TodayHero({
           {firstName ? <span className="text-ink">, {firstName}</span> : null}
         </p>
         <time
-          className="label-mono tnum text-xs text-faint"
+          className="label-mono tnum text-xs text-muted"
           dateTime={now.toISOString()}
           suppressHydrationWarning
         >
@@ -58,12 +58,13 @@ export function TodayHero({
 
       {next ? (
         <div className="mt-4">
-          <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+          <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-muted">
             {late ? "Overdue dose" : "Next dose"}
           </p>
 
-          {/* Dominant line: the countdown is the day's headline figure. */}
-          <h1 className="mt-2 whitespace-nowrap font-display text-[2.75rem] leading-[0.95] tracking-tight text-ink">
+          {/* Dominant line: the countdown is the day's headline figure — the
+              one element carried in brand magenta. Overdue keeps its signal. */}
+          <h1 className="mt-2 whitespace-nowrap font-display text-[2.75rem] leading-[0.95] tracking-tight text-brand">
             {late ? (
               <span className="text-caution">Overdue</span>
             ) : (
@@ -102,7 +103,8 @@ export function TodayHero({
           <h1 className="font-display text-3xl leading-tight text-ink">
             You&apos;re clear for the rest of today
           </h1>
-          <p className="mt-2 text-sm text-muted">
+          <span className="mt-2 block h-0.5 w-10 rounded-[var(--radius-pill)] bg-brand" aria-hidden />
+          <p className="mt-3 text-sm text-muted">
             Nothing else is due. Doses you&apos;ve already taken are in the chart below.
           </p>
         </div>

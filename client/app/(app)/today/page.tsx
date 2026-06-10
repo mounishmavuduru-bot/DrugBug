@@ -182,7 +182,7 @@ export default function TodayPage() {
 
       <section aria-label="Today’s dose chart" className="space-y-3">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+          <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-muted">
             Dose chart
             {dueCount > 0 ? (
               <span className="ml-2 text-ink">
@@ -193,7 +193,7 @@ export default function TodayPage() {
             )}
           </h2>
           <span
-            className="label-mono tnum text-xs text-faint"
+            className="label-mono tnum text-xs text-muted"
             suppressHydrationWarning
           >
             {dayLabel(today)}

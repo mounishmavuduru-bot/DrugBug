@@ -99,8 +99,8 @@ export function CascadeGraph({
         markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
         // Mark model-predicted edges so reference facts read differently (PRD §10.2).
         label: predicted ? "predicted" : undefined,
-        labelStyle: { fill: "#6a6052", fontSize: 9, fontFamily: "var(--font-mono)", letterSpacing: "0.04em" },
-        labelBgStyle: { fill: "#fbf8f0", stroke: "#e0d7c4", strokeWidth: 0.75 },
+        labelStyle: { fill: "#6f5b62", fontSize: 9, fontFamily: "var(--font-mono)", letterSpacing: "0.04em" },
+        labelBgStyle: { fill: "#ffffff", stroke: "#f3d9e1", strokeWidth: 0.75 },
         labelBgPadding: [4, 2],
         labelBgBorderRadius: 2,
       });
@@ -131,9 +131,9 @@ export function CascadeGraph({
   const legend = useMemo(() => {
     const present = new Set(pairs.map((p) => severityColor(p.severity)));
     return [
-      { color: "#a32a1a", label: "Contraindicated" },
-      { color: "#b5521e", label: "Caution" },
-      { color: "#936410", label: "Monitor" },
+      { color: "#c01526", label: "Contraindicated" },
+      { color: "#b8541b", label: "Caution" },
+      { color: "#98690f", label: "Monitor" },
     ].filter((s) => present.has(s.color));
   }, [pairs]);
 
@@ -159,7 +159,7 @@ export function CascadeGraph({
         aria-label="Map of how your medications interact"
       >
         {/* Faint dotted grid on warm paper — a ruled worksheet, not a dark canvas. */}
-        <Background color="#cabfa6" gap={22} size={1} />
+        <Background color="#e6bccb" gap={22} size={1} />
         <Controls
           showInteractive={false}
           className="!border !border-rule !bg-card !shadow-none [&_button]:!border-rule [&_button]:!bg-card [&_button]:!fill-muted hover:[&_button]:!bg-brand-tint"

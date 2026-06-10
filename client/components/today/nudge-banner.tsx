@@ -23,7 +23,7 @@ export function NudgeBanner({
   const medName = row.med?.name ?? "your next dose";
 
   return (
-    <div className="border-y border-rule-strong bg-monitor-tint/40 px-4 py-3">
+    <div className="border-y border-rule-strong bg-monitor-tint px-4 py-3">
       <div className="flex items-start gap-3">
         <BellRing className="mt-0.5 size-4 shrink-0 text-monitor" strokeWidth={1.75} aria-hidden />
         <div className="min-w-0 flex-1">

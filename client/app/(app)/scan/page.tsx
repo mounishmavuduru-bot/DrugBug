@@ -207,10 +207,12 @@ function ScanFlow() {
   return (
     <div className="space-y-6 pb-4">
       <header className="space-y-1">
-        <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+        <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-brand">
           Scan
         </span>
-        <h1 className="text-3xl">Identify a medication</h1>
+        <h1 className="text-3xl">
+          <span className="border-b-2 border-brand pb-0.5">Identify</span> a medication
+        </h1>
         <p className="max-w-prose text-sm leading-relaxed text-muted">
           Photograph a bottle, a loose pill, or a barcode. We read it, then run the authenticity
           checks one layer at a time.

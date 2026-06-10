@@ -33,7 +33,7 @@ export function DoseTimeline({
   busyDoseId?: bigint;
 }) {
   return (
-    <ol className="border-t border-rule-strong">
+    <ol className="overflow-hidden rounded-[var(--radius-md)] border border-rule bg-card">
       {rows.map((row, i) => {
         const status = statusFor(row);
         const style = doseStatusStyle[status];
@@ -47,7 +47,7 @@ export function DoseTimeline({
             key={key}
             className={cn(
               "rise flex items-stretch border-b border-rule",
-              status === "late" && "bg-monitor-tint/60"
+              status === "late" && "bg-monitor-tint"
             )}
             style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
           >

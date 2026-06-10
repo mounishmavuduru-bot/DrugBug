@@ -201,7 +201,7 @@ export default function AddMedicationPage() {
       {/* Scan path (PRD §9.4 path 1) */}
       <Link
         href="/scan?intent=add"
-        className="flex items-center gap-3 rounded-[var(--radius-md)] border border-rule-strong bg-surface px-4 py-3.5 transition-colors duration-150 ease-[var(--ease)] hover:border-brand hover:bg-brand-tint"
+        className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-rule-strong bg-surface px-5 py-4 transition-colors duration-150 ease-[var(--ease)] hover:border-brand hover:bg-brand-tint"
       >
         <ScanLine className="size-5 shrink-0 text-brand" strokeWidth={1.75} aria-hidden />
         <span className="flex-1">
@@ -211,7 +211,7 @@ export default function AddMedicationPage() {
         <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">Open camera</span>
       </Link>
 
-      <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.14em] text-faint">
+      <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.14em] text-muted">
         <span className="h-px flex-1 bg-rule" /> or enter it by hand <span className="h-px flex-1 bg-rule" />
       </div>
 

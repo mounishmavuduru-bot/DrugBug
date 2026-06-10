@@ -16,9 +16,9 @@ import { EmptyState } from "@/components/shared/states";
 import { MedLegend } from "@/components/insights/med-legend";
 import type { MissedDayRow } from "@/components/insights/insights-utils";
 
-// Monograph chart palette.
-const GRID = "#e0d7c4";
-const AXIS = "#6a6052";
+// Brand chart palette — hairline pink grid, muted axis on a white card.
+const GRID = "#f3d9e1";
+const AXIS = "#6f5b62";
 const CURSOR = "rgba(101,93,82,0.12)";
 
 interface MedEntry {

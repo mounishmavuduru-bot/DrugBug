@@ -49,7 +49,7 @@ export default function BriefPage() {
         </Link>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+            <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-muted">
               For your visit
             </p>
             <h1 className="mt-1">Appointment brief</h1>

@@ -144,7 +144,7 @@ export default function PharmacoFitPage() {
       <header className="border-b border-rule-strong pb-5">
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <div>
-            <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+            <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-muted">
               Pharmacogenomics · CPIC
             </p>
             <h1 className="mt-1">PharmacoFit</h1>
@@ -175,7 +175,7 @@ export default function PharmacoFitPage() {
     return (
       <div className="space-y-6">
         <header className="border-b border-rule-strong pb-5">
-          <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+          <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-muted">
             Pharmacogenomics · CPIC
           </p>
           <h1 className="mt-1">PharmacoFit</h1>
@@ -258,7 +258,10 @@ export default function PharmacoFitPage() {
                 Flags for your medications
               </h2>
               {flagsState.status === "ready" && flagsState.flags.length > 0 ? (
-                <span className="label-mono tnum text-xs text-muted">
+                <span
+                  className="grid min-w-5 place-items-center rounded-[var(--radius-pill)] bg-brand px-1.5 label-mono tnum text-xs text-brand-ink"
+                  aria-label={`${flagsState.flags.length} flags`}
+                >
                   {flagsState.flags.length}
                 </span>
               ) : null}

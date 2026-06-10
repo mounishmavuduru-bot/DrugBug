@@ -30,11 +30,11 @@ import {
  */
 function SectionRule({ eyebrow, note }: { eyebrow: string; note: string }) {
   return (
-    <div className="flex items-baseline gap-3 border-b border-rule pb-1.5">
-      <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+    <div className="flex items-baseline gap-3 border-b border-rule-strong pb-1.5">
+      <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-muted">
         {eyebrow}
       </span>
-      <span className="h-px flex-1 self-center bg-rule" aria-hidden />
+      <span className="h-px flex-1 self-center bg-rule-strong" aria-hidden />
       <span className="hidden text-xs text-muted sm:inline">{note}</span>
     </div>
   );
@@ -87,7 +87,7 @@ export default function InsightsPage() {
         return {
           id,
           label: c?.label ?? `Med ${id}`,
-          color: c?.color ?? "#6a6052",
+          color: c?.color ?? "#6f5b62",
           points,
         };
       }),
@@ -104,7 +104,7 @@ export default function InsightsPage() {
     return (
       <div className="space-y-6">
         <header className="border-b border-rule-strong pb-5">
-          <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+          <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-muted">
             Last 30 days
           </p>
           <h1 className="mt-1">Your medication record</h1>
@@ -129,7 +129,7 @@ export default function InsightsPage() {
       <header className="border-b border-rule-strong pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+            <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-muted">
               Last 30 days
             </p>
             <h1 className="mt-1">Your medication record</h1>
@@ -145,7 +145,9 @@ export default function InsightsPage() {
         <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           {overall !== null ? (
             <>
-              <span className="font-display text-6xl leading-none tracking-tight tnum text-ink">
+              {/* The one figure the whole view turns on — set in brand magenta with
+                  a short magenta rule beneath it so the eye lands here first. */}
+              <span className="font-display text-6xl leading-none tracking-tight tnum text-brand decoration-brand underline decoration-4 underline-offset-8">
                 {overall}%
               </span>
               <span className="text-sm text-muted">
