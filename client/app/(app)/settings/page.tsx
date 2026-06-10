@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Settings as SettingsIcon, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -32,30 +32,45 @@ export default function SettingsPage() {
   const caregiverCount = asCaregiver.length;
 
   const header = (
-    <header className="flex items-center gap-2">
-      <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-        <SettingsIcon className="size-5 text-primary" /> Settings
+    <header className="border-b border-rule-strong pb-5">
+      <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+        Account
+      </p>
+      <h1 className="mt-2 font-display text-[2.4rem] leading-[1.05] tracking-tight text-ink">
+        Settings
       </h1>
+      <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-muted">
+        Edit the details DrugBug uses to check your doses, turn dose reminders on or off,
+        and manage who can see your record.
+      </p>
     </header>
   );
 
-  // ---- connection gating ----
+  // ---- connection gating (loading) ----
   if (!connected || !me || !profileReady) {
-    return <LoadingState label="Connecting to DrugBug…" />;
+    return (
+      <div className="space-y-6">
+        {header}
+        <LoadingState rows={3} label="Connecting to DrugBug" />
+      </div>
+    );
   }
 
-  // ---- no profile yet ----
+  // ---- no profile yet (empty) ----
   if (!profile) {
     return (
-      <div className="space-y-5 pb-8">
+      <div className="space-y-6 pb-8">
         {header}
         <EmptyState
           icon={UserPlus}
-          title="Set up your profile"
-          description="Create your profile to manage your medication safety settings."
+          title="No profile yet"
+          description="Set up your profile so dose checks, interaction warnings, and reminders work for you."
           action={
-            <Link href="/today" className={buttonVariants({ variant: "primary", size: "sm" })}>
-              Get started
+            <Link
+              href="/today"
+              className={buttonVariants({ variant: "primary", size: "sm" })}
+            >
+              Set up profile
             </Link>
           }
         />
@@ -67,7 +82,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-8 pb-8">
       {header}
 
       <ProfileSection me={me} profile={profile} />

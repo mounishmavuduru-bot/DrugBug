@@ -14,8 +14,8 @@ const ACCESS_ICON = {
 export function AccessBadge({ level }: { level: string }) {
   const Icon = ACCESS_ICON[level as keyof typeof ACCESS_ICON] ?? Eye;
   return (
-    <Badge variant="primary" aria-label={`Access level: ${accessLabel(level)}`}>
-      <Icon className="size-3" />
+    <Badge variant="brand" aria-label={`Access level: ${accessLabel(level)}`}>
+      <Icon className="size-3" strokeWidth={1.75} />
       {accessLabel(level)}
     </Badge>
   );

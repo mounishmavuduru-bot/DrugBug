@@ -1,55 +1,42 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ShieldCheck,
-  Lock,
-  Database,
-  Ban,
-  RotateCcw,
-  Loader2,
-  AlertTriangle,
-} from "lucide-react";
+import { ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 /**
- * Granular, explicit PGx consent screen (PRD §10.4 + §15). Spells out exactly
- * what is processed, that genomic data is never sold or shared, that it is
- * encrypted at rest, and that consent is revocable. Continue calls
- * setPgxConsent({ consent: true }); the screen does not proceed to upload until
- * the profile reflects consent via the realtime subscription.
+ * Granular, explicit PGx consent screen. Spells out exactly what is processed,
+ * that genomic data is never sold or shared, that it is encrypted at rest, and
+ * that consent is revocable. Continue calls setPgxConsent({ consent: true });
+ * the screen does not proceed to upload until the profile reflects consent via
+ * the realtime subscription.
+ *
+ * Rendered as a single ruled "terms" data sheet rather than a grid of identical
+ * icon-tile cards, so the four points read as one document the user is agreeing
+ * to, not four marketing features.
  */
 
-const PROCESSED = [
+const TERMS = [
   {
-    icon: Database,
-    title: "What we process",
-    body: "Your uploaded 23andMe / AncestryDNA raw genotype file is converted to a VCF and run through PharmCAT to call CPIC star-allele diplotypes. Only the derived pharmacogenomic phenotypes (e.g. CYP2D6 status) are stored on your profile.",
+    label: "What we process",
+    body: "We convert your 23andMe or AncestryDNA raw genotype file to a VCF and run PharmCAT to call CPIC star-allele diplotypes. Only the derived phenotypes (for example, your CYP2D6 metabolizer status) are kept on your profile.",
   },
   {
-    icon: Lock,
-    title: "How it is protected",
-    body: "Genomic data and derived phenotypes are encrypted at rest and transmitted over TLS. They are used only to personalize medication risk for you — for nothing else.",
+    label: "How it is protected",
+    body: "Genomic data and the derived phenotypes are encrypted at rest and sent over TLS. They are used to match your medications against pharmacogenomic guidance, and nothing else.",
   },
   {
-    icon: Ban,
-    title: "Never sold or shared",
-    body: "Your genetic data is never sold, never shared with third parties, and never used for advertising or research without separate, explicit opt-in.",
+    label: "Never sold or shared",
+    body: "Your genetic data is not sold, not shared with third parties, and not used for advertising or research without a separate, explicit opt-in.",
   },
   {
-    icon: RotateCcw,
-    title: "Revocable and deletable",
-    body: "You can revoke consent at any time. Revoking clears your derived pharmacogenomic phenotypes, and your raw genotype file is deletable on request.",
+    label: "Revocable and deletable",
+    body: "You can revoke consent at any time. Revoking clears the derived phenotypes, and you can request deletion of your raw genotype file.",
   },
 ] as const;
 
-export function ConsentGate({
-  onConsent,
-}: {
-  onConsent: () => Promise<void>;
-}) {
+export function ConsentGate({ onConsent }: { onConsent: () => Promise<void> }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,7 +47,7 @@ export function ConsentGate({
       await onConsent();
     } catch (e) {
       setError(
-        e instanceof Error ? e.message : "Couldn’t save your consent. Try again.",
+        e instanceof Error ? e.message : "We couldn't save your consent. Try again.",
       );
       setSubmitting(false);
     }
@@ -68,46 +55,38 @@ export function ConsentGate({
 
   return (
     <div className="space-y-4">
-      <Card className="space-y-3 border-primary/30">
-        <div className="flex items-start gap-3">
-          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
-            <ShieldCheck className="size-5" />
-          </div>
+      <section className="rounded-[var(--radius-md)] border border-rule bg-card">
+        <div className="flex items-start gap-3 border-b border-rule px-4 py-3.5">
+          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-brand" aria-hidden />
           <div>
-            <h2 className="text-sm font-semibold text-text">
+            <h2 className="font-display text-lg text-ink">
               Consent to pharmacogenomic processing
             </h2>
-            <p className="mt-1 text-xs leading-snug text-muted">
-              PharmacoFit personalizes medication risk to your DNA. Because this
-              is sensitive genetic data, we ask for your explicit consent first.
-              Please read what happens to your data below.
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              This is sensitive genetic data, so we ask for your explicit consent
+              before processing it. Read what happens to your file below, then
+              continue if you agree.
             </p>
           </div>
         </div>
-      </Card>
 
-      <ul className="space-y-3">
-        {PROCESSED.map(({ icon: Icon, title, body }) => (
-          <li key={title}>
-            <Card className="flex items-start gap-3">
-              <div className="grid size-9 shrink-0 place-items-center rounded-full bg-elevated text-muted">
-                <Icon className="size-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-text">{title}</p>
-                <p className="mt-1 text-xs leading-snug text-muted">{body}</p>
-              </div>
-            </Card>
-          </li>
-        ))}
-      </ul>
+        <dl className="divide-y divide-rule">
+          {TERMS.map(({ label, body }) => (
+            <div key={label} className="px-4 py-3.5">
+              <dt className="label-mono text-[11px] uppercase tracking-[0.12em] text-faint">
+                {label}
+              </dt>
+              <dd className="mt-1.5 text-sm leading-relaxed text-ink">{body}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
       {error ? (
-        <Card className="border-danger/40">
-          <p className="flex items-center gap-2 text-sm text-danger">
-            <AlertTriangle className="size-4 shrink-0" /> {error}
-          </p>
-        </Card>
+        <p className="flex items-start gap-1.5 text-sm text-danger" role="alert">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+          {error}
+        </p>
       ) : null}
 
       <div className="space-y-2">
@@ -119,17 +98,17 @@ export function ConsentGate({
         >
           {submitting ? (
             <>
-              <Loader2 className="size-4 animate-spin" /> Saving consent…
+              <Loader2 className="animate-spin" /> Saving consent
             </>
           ) : (
             <>
-              <ShieldCheck className="size-4" /> I consent — continue
+              <ShieldCheck /> I consent — continue
             </>
           )}
         </Button>
-        <p className="text-center text-[11px] leading-snug text-muted">
-          By continuing you confirm you understand the above and consent to
-          pharmacogenomic processing of your uploaded genotype file. You can
+        <p className="text-center text-xs leading-relaxed text-muted">
+          Continuing confirms you understand the terms above and consent to
+          pharmacogenomic processing of the genotype file you upload. You can
           revoke this at any time from this screen.
         </p>
       </div>

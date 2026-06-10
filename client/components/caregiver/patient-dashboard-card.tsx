@@ -19,11 +19,9 @@ import { useReducer } from "spacetimedb/react";
 import { reducers } from "@/lib/db";
 import { usePatientMeds, useDoses, useSideEffects, useRecalls } from "@/lib/hooks";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/shared/states";
 import { clockTime } from "@/lib/format";
-import { adherenceVariant } from "@/components/med/med-utils";
 import { todaysDoses, isLate, type DoseWithMed } from "@/components/today/today-utils";
 import { PatientMedsList } from "@/components/caregiver/patient-meds-list";
 import { AccessBadge } from "@/components/caregiver/access-badge";
@@ -44,21 +42,38 @@ const ALERT_ICON = {
   recall: Bell,
 } as const;
 
+const ALERT_KIND_LABEL = {
+  missed: "Missed",
+  "side-effect": "Side effect",
+  refill: "Refill",
+  recall: "Recall",
+} as const;
+
+/** Ink-tone for the large adherence figure. Mirrors adherenceVariant thresholds. */
+function adherenceTone(pct: number): string {
+  if (pct >= 80) return "text-positive";
+  if (pct >= 50) return "text-monitor";
+  return "text-danger";
+}
+
 function AlertRow({ alert }: { alert: CaregiverAlert }) {
   const Icon = ALERT_ICON[alert.kind];
   const tone =
     alert.severity === "danger"
       ? "text-danger"
       : alert.severity === "warning"
-        ? "text-warning"
+        ? "text-caution"
         : "text-muted";
   return (
-    <li className="flex items-start gap-2.5 rounded-[var(--radius)] border border-border bg-elevated p-2.5">
-      <Icon className={`mt-0.5 size-4 shrink-0 ${tone}`} />
+    <li className="flex items-start gap-3 border-t border-rule px-3.5 py-2.5 first:border-t-0">
+      <Icon className={`mt-0.5 size-4 shrink-0 ${tone}`} strokeWidth={1.75} />
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-text">{alert.title}</p>
+        <p className="text-xs font-medium text-ink">{alert.title}</p>
         <p className="text-[11px] text-muted">{alert.detail}</p>
       </div>
+      <span className="label-mono shrink-0 pt-0.5 text-[10px] uppercase tracking-[0.1em] text-faint">
+        {ALERT_KIND_LABEL[alert.kind]}
+      </span>
     </li>
   );
 }
@@ -123,67 +138,88 @@ export function PatientDashboardCard({ link }: { link: CaregiverLink }) {
   const patientHex = link.patientIdentity.toHexString();
 
   return (
-    <Card className="space-y-3">
+    <Card className="overflow-hidden">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3 border-b border-rule px-4 py-3">
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-elevated text-muted">
-            <User className="size-4" />
+          <div className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-brand-tint text-brand">
+            <User className="size-4" strokeWidth={1.75} />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-text">
+            <p className="truncate text-sm font-semibold text-ink">
               {link.caregiverEmail || "Patient"}
             </p>
-            <p className="mono truncate text-[11px] text-muted">{shortIdentity(patientHex)}</p>
+            <p className="label-mono truncate text-[11px] text-muted">{shortIdentity(patientHex)}</p>
           </div>
         </div>
         <AccessBadge level={link.accessLevel} />
       </div>
 
       {!ready ? (
-        <LoadingState label="Loading patient summary…" />
+        <div className="px-4 py-4">
+          <LoadingState rows={2} label="Loading patient summary…" />
+        </div>
       ) : (
-        <>
-          {/* Adherence summary */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-[var(--radius)] border border-border bg-elevated p-2.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-muted">7-day adherence</p>
-              {summary.adherencePct !== null ? (
-                <Badge variant={adherenceVariant(summary.adherencePct)} className="mt-1">
-                  {summary.adherencePct}%
-                </Badge>
-              ) : (
-                <p className="mt-1 text-xs text-muted">No data</p>
-              )}
-            </div>
-            <div className="rounded-[var(--radius)] border border-border bg-elevated p-2.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-muted">Active meds</p>
-              <p className="mt-1 text-sm font-semibold text-text">{summary.activeMeds}</p>
-            </div>
-            <div className="rounded-[var(--radius)] border border-border bg-elevated p-2.5 text-center">
-              <p className="text-[10px] uppercase tracking-wide text-muted">Open alerts</p>
-              <p
-                className={`mt-1 text-sm font-semibold ${
-                  alerts.length > 0 ? "text-warning" : "text-text"
-                }`}
-              >
-                {alerts.length}
+        <div className="space-y-4 px-4 py-4">
+          {/* Lead with adherence — the one figure a caregiver scans for. The 7-day
+              percentage reads at display size; meds + alert counts sit beside it as
+              quiet secondary facts, not three equal cards. */}
+          <div className="flex items-end justify-between gap-4 border-b border-rule pb-4">
+            <div className="min-w-0">
+              <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+                Adherence · last 7 days
               </p>
+              {summary.adherencePct !== null ? (
+                <p className="mt-1 flex items-baseline gap-2">
+                  <span
+                    className={`font-display tnum text-[2.6rem] leading-none ${adherenceTone(
+                      summary.adherencePct
+                    )}`}
+                  >
+                    {summary.adherencePct}
+                    <span className="text-[1.4rem]">%</span>
+                  </span>
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-faint">No doses logged this week.</p>
+              )}
+              {summary.scheduledLast7d > 0 ? (
+                <p className="label-mono mt-1.5 text-[11px] text-muted">
+                  <span className="tnum">{summary.takenLast7d}</span> of{" "}
+                  <span className="tnum">{summary.scheduledLast7d}</span> scheduled doses on time
+                </p>
+              ) : null}
             </div>
+            <dl className="shrink-0 space-y-1.5 text-right">
+              <div className="flex items-baseline justify-end gap-2">
+                <dt className="text-[11px] text-muted">Active meds</dt>
+                <dd className="tnum text-sm font-semibold text-ink">{summary.activeMeds}</dd>
+              </div>
+              <div className="flex items-baseline justify-end gap-2">
+                <dt className="text-[11px] text-muted">Open alerts</dt>
+                <dd
+                  className={`tnum text-sm font-semibold ${
+                    alerts.length > 0 ? "text-caution" : "text-positive"
+                  }`}
+                >
+                  {alerts.length}
+                </dd>
+              </div>
+            </dl>
           </div>
 
           {/* Active alerts */}
-          <section aria-label="Active alerts" className="space-y-1.5">
-            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-              Active alerts
+          <section aria-label="Active alerts" className="space-y-2">
+            <h4 className="text-sm font-semibold text-ink">
+              {alerts.length > 0 ? "Needs attention" : "Nothing flagged"}
             </h4>
             {alerts.length === 0 ? (
-              <p className="flex items-center gap-1.5 rounded-[var(--radius)] border border-border bg-elevated p-2.5 text-xs text-muted">
-                <Check className="size-3.5 text-success" />
-                No active alerts — adherence, refills, side effects and recalls look clear.
+              <p className="flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-rule bg-surface px-3.5 py-2.5 text-xs text-muted">
+                <Check className="size-3.5 text-positive" strokeWidth={1.75} />
+                No missed doses, refills, side effects, or recalls in the last few days.
               </p>
             ) : (
-              <ul className="space-y-1.5">
+              <ul className="rounded-[var(--radius-sm)] border border-rule bg-card">
                 {alerts.map((a) => (
                   <AlertRow key={a.id} alert={a} />
                 ))}
@@ -192,7 +228,7 @@ export function PatientDashboardCard({ link }: { link: CaregiverLink }) {
           </section>
 
           {logError ? (
-            <p className="rounded-[var(--radius)] border border-danger/30 bg-danger/10 p-2 text-xs text-danger">
+            <p className="rounded-[var(--radius-sm)] border border-rule bg-danger-tint px-3 py-2 text-xs text-danger">
               {logError}
             </p>
           ) : null}
@@ -203,47 +239,53 @@ export function PatientDashboardCard({ link }: { link: CaregiverLink }) {
               <button
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
-                className="flex w-full items-center justify-between rounded-[var(--radius)] border border-border bg-elevated px-3 py-2 text-xs font-medium text-text transition-fast hover:border-primary/40"
+                className="flex w-full items-center justify-between rounded-[var(--radius-sm)] border border-rule-strong bg-card px-3 py-2 text-xs font-medium text-ink transition-colors duration-150 ease-[var(--ease)] hover:bg-brand-tint"
                 aria-expanded={expanded}
               >
                 <span className="flex items-center gap-1.5">
-                  <Check className="size-3.5 text-primary" />
+                  <Check className="size-3.5 text-brand" strokeWidth={1.75} />
                   Log today&apos;s doses ({pendingToday.length} pending)
                 </span>
-                {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                {expanded ? (
+                  <ChevronUp className="size-4" strokeWidth={1.75} />
+                ) : (
+                  <ChevronDown className="size-4" strokeWidth={1.75} />
+                )}
               </button>
               {expanded ? (
                 pendingToday.length === 0 ? (
-                  <p className="px-1 text-xs text-muted">No pending doses for today.</p>
+                  <p className="px-1 text-xs text-muted">Nothing left to log for today.</p>
                 ) : (
-                  <ul className="space-y-1.5">
+                  <ul className="divide-y divide-rule rounded-[var(--radius-sm)] border border-rule bg-card">
                     {pendingToday.map((row) => {
                       const busy = busyDoseId === row.dose.doseId;
                       return (
                         <li
                           key={row.dose.doseId.toString()}
-                          className="flex items-center gap-2 rounded-[var(--radius)] border border-border bg-elevated p-2.5"
+                          className="flex items-center gap-2 px-3 py-2.5"
                         >
-                          <span className="mono flex w-14 shrink-0 items-center gap-1 text-xs text-muted">
+                          <span className="label-mono flex w-14 shrink-0 items-center text-xs text-muted">
                             {clockTime(row.scheduledAt)}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <p className="mono truncate text-xs text-text">
+                            <p className="label-mono truncate text-xs text-ink">
                               {row.med?.name ?? "Medication"}
                             </p>
                             {row.med?.strength ? (
-                              <p className="mono truncate text-[11px] text-muted">{row.med.strength}</p>
+                              <p className="label-mono truncate text-[11px] text-muted">
+                                {row.med.strength}
+                              </p>
                             ) : null}
                           </div>
                           <div className="flex shrink-0 items-center gap-1.5">
                             <Button
-                              variant="ghost"
+                              variant="quiet"
                               size="sm"
                               onClick={() => handleLog(row, "skipped")}
                               disabled={busy}
                               aria-label={`Skip ${row.med?.name ?? "dose"} for patient`}
                             >
-                              <X className="size-4" />
+                              <X className="size-4" strokeWidth={1.75} />
                               Skip
                             </Button>
                             <Button
@@ -253,7 +295,7 @@ export function PatientDashboardCard({ link }: { link: CaregiverLink }) {
                               disabled={busy}
                               aria-label={`Mark ${row.med?.name ?? "dose"} taken for patient`}
                             >
-                              <Check className="size-4" />
+                              <Check className="size-4" strokeWidth={1.75} />
                               Taken
                             </Button>
                           </div>
@@ -271,14 +313,18 @@ export function PatientDashboardCard({ link }: { link: CaregiverLink }) {
               <button
                 type="button"
                 onClick={() => setShowMeds((v) => !v)}
-                className="flex w-full items-center justify-between rounded-[var(--radius)] border border-border bg-elevated px-3 py-2 text-xs font-medium text-text transition-fast hover:border-primary/40"
+                className="flex w-full items-center justify-between rounded-[var(--radius-sm)] border border-rule-strong bg-card px-3 py-2 text-xs font-medium text-ink transition-colors duration-150 ease-[var(--ease)] hover:bg-brand-tint"
                 aria-expanded={showMeds}
               >
                 <span className="flex items-center gap-1.5">
-                  <Pill className="size-3.5 text-primary" />
+                  <Pill className="size-3.5 text-brand" strokeWidth={1.75} />
                   Patient medications
                 </span>
-                {showMeds ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                {showMeds ? (
+                  <ChevronUp className="size-4" strokeWidth={1.75} />
+                ) : (
+                  <ChevronDown className="size-4" strokeWidth={1.75} />
+                )}
               </button>
               {showMeds ? <PatientMedsList meds={meds} doses={doses} /> : null}
             </section>
@@ -287,15 +333,15 @@ export function PatientDashboardCard({ link }: { link: CaregiverLink }) {
           {/* Access scope hint */}
           {!log && !manage ? (
             <p className="flex items-center gap-1.5 text-[11px] text-muted">
-              <Eye className="size-3" />
-              Read-only access — you can see adherence and alerts, but not log doses or change meds.
+              <Eye className="size-3" strokeWidth={1.75} />
+              Read-only access. You can see adherence and alerts, but not log doses or change meds.
             </p>
           ) : null}
 
-          <p className="border-t border-border pt-2 text-[10px] leading-relaxed text-muted">
-            Decision-support — confirm with your pharmacist or prescriber.
+          <p className="border-t border-rule pt-2.5 text-[11px] leading-relaxed text-muted">
+            Decision support, not a diagnosis — confirm with your pharmacist or prescriber.
           </p>
-        </>
+        </div>
       )}
     </Card>
   );

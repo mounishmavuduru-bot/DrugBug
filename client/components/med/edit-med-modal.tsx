@@ -7,7 +7,7 @@ import { reducers } from "@/lib/db";
 import { tsToDate, toTs } from "@/lib/format";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
+import { Input, Select, Label } from "@/components/ui/input";
 import { ScheduleBuilder, type ScheduleValue } from "@/components/med/schedule-builder";
 import { FORM_OPTIONS, type Medication } from "@/components/med/med-utils";
 
@@ -42,10 +42,10 @@ export function EditMedModal({
   const [error, setError] = useState<string | null>(null);
 
   const submit = async () => {
-    if (!name.trim()) return setError("Name is required.");
-    if (!strength.trim()) return setError("Strength is required.");
+    if (!name.trim()) return setError("Enter the medication name.");
+    if (!strength.trim()) return setError("Enter the strength, e.g. 10 mg.");
     if (!schedule.prn && schedule.times.length === 0)
-      return setError("Add at least one dose time, or mark as PRN.");
+      return setError("Add at least one dose time, or mark it as taken only when needed.");
     setSaving(true);
     setError(null);
     try {
@@ -68,7 +68,7 @@ export function EditMedModal({
       });
       onClose();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to update medication.");
+      setError(e instanceof Error ? e.message : "Couldn't save your changes. Try again.");
     } finally {
       setSaving(false);
     }
@@ -79,27 +79,22 @@ export function EditMedModal({
       <div className="max-h-[70vh] space-y-4 overflow-auto pr-1">
         <div>
           <Label htmlFor="edit-name">Name</Label>
-          <Input id="edit-name" className="mono" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input id="edit-name" className="label-mono" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label htmlFor="edit-strength">Strength</Label>
-            <Input id="edit-strength" className="mono" value={strength} onChange={(e) => setStrength(e.target.value)} />
+            <Input id="edit-strength" className="label-mono" value={strength} onChange={(e) => setStrength(e.target.value)} />
           </div>
           <div>
             <Label htmlFor="edit-form">Form</Label>
-            <select
-              id="edit-form"
-              value={form}
-              onChange={(e) => setForm(e.target.value)}
-              className="flex h-10 w-full rounded-[var(--radius)] border border-border bg-elevated px-3 text-sm text-text outline-none focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/30"
-            >
+            <Select id="edit-form" value={form} onChange={(e) => setForm(e.target.value)}>
               {FORM_OPTIONS.map((f) => (
                 <option key={f} value={f}>
                   {f}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -121,7 +116,7 @@ export function EditMedModal({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label htmlFor="edit-ndc">NDC</Label>
-            <Input id="edit-ndc" className="mono" value={ndc} onChange={(e) => setNdc(e.target.value)} />
+            <Input id="edit-ndc" className="label-mono" value={ndc} onChange={(e) => setNdc(e.target.value)} />
           </div>
           <div>
             <Label htmlFor="edit-refill">Refill date</Label>
@@ -135,30 +130,30 @@ export function EditMedModal({
               id="edit-doses"
               type="number"
               min={0}
-              className="mono"
+              className="label-mono tnum"
               value={dosesRemaining}
               onChange={(e) => setDosesRemaining(e.target.value)}
             />
           </div>
         </div>
-        <label className="flex items-center gap-2 text-sm text-text">
+        <label className="flex items-center gap-2 text-sm text-ink">
           <input
             type="checkbox"
-            className="size-4 accent-[var(--color-primary,#06B6D4)]"
+            className="size-4 accent-[var(--color-brand)]"
             checked={isOtc}
             onChange={(e) => setIsOtc(e.target.checked)}
           />
           Over-the-counter
         </label>
 
-        {error ? <p className="text-xs text-danger">{error}</p> : null}
+        {error ? <p className="text-xs text-danger" role="alert">{error}</p> : null}
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="flex-1" onClick={onClose} disabled={saving}>
+          <Button variant="secondary" className="flex-1" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
           <Button className="flex-1" onClick={submit} disabled={saving}>
-            {saving ? <Loader2 className="size-4 animate-spin" /> : "Save changes"}
+            {saving ? <Loader2 className="animate-spin" /> : "Save changes"}
           </Button>
         </div>
       </div>

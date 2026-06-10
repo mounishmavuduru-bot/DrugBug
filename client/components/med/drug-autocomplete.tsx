@@ -108,7 +108,10 @@ export function DrugAutocomplete({
   return (
     <div className="relative" ref={boxRef}>
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
+        <Search
+          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint"
+          strokeWidth={1.75}
+        />
         <Input
           id={id}
           value={value}
@@ -120,24 +123,24 @@ export function DrugAutocomplete({
           role="combobox"
           aria-expanded={open}
           aria-autocomplete="list"
-          className="mono pl-9"
+          className="label-mono pl-9"
         />
         {loading ? (
-          <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted" />
+          <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-faint" />
         ) : null}
       </div>
 
       {open ? (
         <div
           role="listbox"
-          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-[var(--radius)] border border-border bg-elevated shadow-2xl"
+          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-[var(--radius-md)] border border-rule-strong bg-card shadow-[0_18px_44px_-22px_rgba(24,19,13,0.4)]"
         >
           {failed ? (
             <p className="px-3 py-2 text-xs text-muted">
-              Drug lookup unavailable — you can still type the name manually.
+              The drug lookup isn&apos;t responding right now. You can still type the name yourself.
             </p>
           ) : results.length === 0 && !loading ? (
-            <p className="px-3 py-2 text-xs text-muted">No matches. Keep typing or enter manually.</p>
+            <p className="px-3 py-2 text-xs text-muted">No matches yet. Keep typing, or just enter the name.</p>
           ) : (
             results.map((r, i) => (
               <button
@@ -148,14 +151,14 @@ export function DrugAutocomplete({
                 onClick={() => choose(r)}
                 onMouseEnter={() => setActiveIdx(i)}
                 className={cn(
-                  "flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left transition-fast",
-                  i === activeIdx ? "bg-primary/15" : "hover:bg-surface"
+                  "flex w-full flex-col items-start gap-0.5 border-b border-rule px-3 py-2 text-left transition-colors duration-150 ease-[var(--ease)] last:border-b-0",
+                  i === activeIdx ? "bg-brand-tint" : "hover:bg-brand-tint"
                 )}
               >
-                <span className="mono text-sm text-text">{r.name}</span>
+                <span className="label-mono text-sm text-ink">{r.name}</span>
                 <span className="text-[11px] text-muted">
-                  {r.genericName ? <span className="mono">{r.genericName}</span> : null}
-                  {r.rxcui ? <span className="ml-2">RxCUI {r.rxcui}</span> : null}
+                  {r.genericName ? <span className="label-mono">{r.genericName}</span> : null}
+                  {r.rxcui ? <span className="ml-2 label-mono">RxCUI {r.rxcui}</span> : null}
                 </span>
               </button>
             ))

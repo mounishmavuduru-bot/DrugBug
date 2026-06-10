@@ -7,7 +7,7 @@ import { reducers } from "@/lib/db";
 import { toTs } from "@/lib/format";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
+import { Input, Select, Label } from "@/components/ui/input";
 
 const PROVIDER_TYPES = [
   "Primary care",
@@ -59,7 +59,7 @@ export function AppointmentForm({
     }
     const when = scheduledFor ? new Date(scheduledFor) : null;
     if (!when || Number.isNaN(when.getTime())) {
-      setError("Choose a valid date and time.");
+      setError("Pick a date and time for the appointment.");
       return;
     }
     setBusy(true);
@@ -74,15 +74,15 @@ export function AppointmentForm({
       reset();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create the appointment.");
+      setError(err instanceof Error ? err.message : "Could not save the appointment.");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <Modal open={open} onClose={close} title="New appointment">
-      <form onSubmit={submit} className="space-y-4">
+    <Modal open={open} onClose={close} title="Add appointment">
+      <form onSubmit={submit} className="space-y-4" noValidate>
         <div>
           <Label htmlFor="appt-provider-name">Provider name</Label>
           <Input
@@ -96,38 +96,43 @@ export function AppointmentForm({
 
         <div>
           <Label htmlFor="appt-provider-type">Provider type</Label>
-          <select
+          <Select
             id="appt-provider-type"
             value={providerType}
             onChange={(e) => setProviderType(e.target.value)}
-            className="flex h-10 w-full rounded-[var(--radius)] border border-border bg-elevated px-3 text-sm text-text outline-none transition-fast focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/30"
           >
             {PROVIDER_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <Label htmlFor="appt-when">Date &amp; time</Label>
+          <Label htmlFor="appt-when">Date and time</Label>
           <Input
             id="appt-when"
             type="datetime-local"
             value={scheduledFor}
             onChange={(e) => setScheduledFor(e.target.value)}
+            required
+            aria-invalid={!!error && !scheduledFor}
           />
         </div>
 
-        {error ? <p className="text-xs text-danger">{error}</p> : null}
+        {error ? (
+          <p className="text-xs text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         <div className="flex justify-end gap-2 pt-1">
-          <Button type="button" variant="ghost" onClick={close} disabled={busy}>
+          <Button type="button" variant="quiet" onClick={close} disabled={busy}>
             Cancel
           </Button>
           <Button type="submit" variant="primary" disabled={busy || !owner}>
-            {busy ? "Creating…" : "Create appointment"}
+            {busy ? "Saving…" : "Save appointment"}
           </Button>
         </div>
       </form>

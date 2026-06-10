@@ -44,12 +44,12 @@ export function canManage(level: string): boolean {
   return level === "manage";
 }
 
-export function statusVariant(status: string): "neutral" | "primary" | "success" | "warning" | "danger" {
+export function statusVariant(status: string): "neutral" | "positive" | "monitor" | "danger" {
   switch (status) {
     case "accepted":
-      return "success";
+      return "positive";
     case "pending":
-      return "warning";
+      return "monitor";
     case "revoked":
       return "danger";
     default:

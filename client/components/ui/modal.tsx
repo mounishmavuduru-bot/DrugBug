@@ -5,8 +5,9 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Minimal accessible modal (no external dialog dep). Traps focus loosely via
- * Escape-to-close + backdrop click, locks scroll, and exposes aria-modal.
+ * Monograph modal. Paper sheet, hairline rule, one soft shadow (the only place a
+ * shadow is used). Closes on Escape, overlay click, and the X. Locks scroll and
+ * moves focus in / restores it on close (keyboard accessibility).
  */
 export function Modal({
   open,
@@ -21,14 +22,20 @@ export function Modal({
   children: React.ReactNode;
   className?: string;
 }) {
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  const restoreRef = React.useRef<HTMLElement | null>(null);
+
   React.useEffect(() => {
     if (!open) return;
+    restoreRef.current = document.activeElement as HTMLElement;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    panelRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      restoreRef.current?.focus?.();
     };
   }, [open, onClose]);
 
@@ -36,30 +43,32 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/35 p-0 sm:items-center sm:p-4"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         className={cn(
-          "surface w-full max-w-lg rounded-t-2xl border border-border p-5 shadow-2xl sm:rounded-2xl",
+          "w-full max-w-lg rounded-t-[var(--radius-md)] border border-rule bg-card shadow-[0_24px_60px_-20px_rgba(24,19,13,0.45)] outline-none sm:rounded-[var(--radius-md)]",
           className
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
-          {title ? <h2 className="text-base font-semibold">{title}</h2> : <span />}
+        <div className="flex items-baseline justify-between gap-3 border-b border-rule px-5 py-3.5">
+          {title ? <h2 className="text-lg font-semibold">{title}</h2> : <span />}
           <button
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1 text-muted transition-fast hover:bg-elevated hover:text-text"
+            className="-mr-1 rounded-[var(--radius-sm)] p-1.5 text-muted transition-colors hover:bg-brand-tint hover:text-ink"
           >
             <X className="size-4" />
           </button>
         </div>
-        {children}
+        <div className="px-5 py-4">{children}</div>
       </div>
     </div>
   );

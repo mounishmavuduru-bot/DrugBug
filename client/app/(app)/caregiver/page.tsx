@@ -30,17 +30,27 @@ export default function CaregiverPage() {
   );
 
   return (
-    <div className="space-y-5">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight">Caregiver</h1>
-        <p className="text-xs text-muted">
-          Care for someone else&apos;s medications, or invite caregivers to help with yours. Changes
-          sync in realtime across every device.
+    <div className="space-y-6">
+      <header className="border-b border-rule-strong pb-5">
+        <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+          Shared care
+        </p>
+        <h1 className="mt-2 font-display text-[2.4rem] leading-[1.05] tracking-tight text-ink">
+          Caregiver
+        </h1>
+        <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-muted">
+          Follow another person&apos;s doses and alerts, or hand a family member the same
+          view of yours. What they can do depends on the access level you grant.
         </p>
       </header>
 
-      {/* Section toggle (no Tabs primitive in the foundation — accessible tablist). */}
-      <div role="tablist" aria-label="Caregiver sections" className="flex gap-1 rounded-[var(--radius)] border border-border bg-surface p-1">
+      {/* Section toggle — a quiet ruled segmented control, not a shadowed pill row.
+          No Tabs primitive in the foundation, so this is a hand-built accessible tablist. */}
+      <div
+        role="tablist"
+        aria-label="Caregiver sections"
+        className="inline-flex rounded-[var(--radius-sm)] border border-rule-strong bg-surface p-0.5"
+      >
         {TABS.map((t) => {
           const Icon = t.icon;
           const active = tab === t.id;
@@ -54,13 +64,13 @@ export default function CaregiverPage() {
               aria-controls={`panel-${t.id}`}
               onClick={() => setTab(t.id)}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--radius)-2px)] px-3 py-2 text-xs font-medium transition-fast",
+                "inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-sm)] px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-150 ease-[var(--ease)]",
                 active
-                  ? "bg-elevated text-text shadow-sm"
-                  : "text-muted hover:text-text"
+                  ? "bg-brand text-brand-ink"
+                  : "text-muted hover:text-ink"
               )}
             >
-              <Icon className="size-3.5" />
+              <Icon className="size-3.5" strokeWidth={1.75} />
               {t.label}
             </button>
           );
@@ -70,10 +80,10 @@ export default function CaregiverPage() {
       {!connected ? (
         <ErrorState
           title="Not connected"
-          description="We lost the realtime connection. Caregiver links and patient summaries can't load until it's back."
+          description="The realtime link dropped. Caregiver links and patient summaries will load once it reconnects."
         />
       ) : !ready ? (
-        <LoadingState label="Loading caregiver links…" />
+        <LoadingState rows={3} label="Loading caregiver links…" />
       ) : tab === "caregiver" ? (
         <section
           role="tabpanel"
@@ -81,18 +91,21 @@ export default function CaregiverPage() {
           aria-labelledby="tab-caregiver"
           className="space-y-4"
         >
-          <div>
-            <h2 className="text-sm font-semibold text-text">Patients you care for</h2>
-            <p className="text-xs text-muted">
-              Live adherence and active alerts for everyone who has accepted your help.
-            </p>
+          <div className="flex items-baseline justify-between gap-3 border-b border-rule pb-1.5">
+            <h2 className="text-xl">Patients you care for</h2>
+            {patients.length > 0 ? (
+              <span className="label-mono shrink-0 text-[11px] uppercase tracking-[0.12em] text-faint">
+                <span className="tnum">{patients.length}</span>{" "}
+                {patients.length === 1 ? "person" : "people"}
+              </span>
+            ) : null}
           </div>
 
           {patients.length === 0 ? (
             <EmptyState
               icon={HeartHandshake}
               title="No patients yet"
-              description="When someone invites you and you accept their link ID under “My caregivers,” their dashboard appears here."
+              description="When someone invites you and you accept their link ID under “My caregivers,” their dashboard shows up here — adherence, open alerts, and today's doses."
             />
           ) : (
             <div className="space-y-4">
@@ -103,11 +116,7 @@ export default function CaregiverPage() {
           )}
         </section>
       ) : (
-        <section
-          role="tabpanel"
-          id="panel-patient"
-          aria-labelledby="tab-patient"
-        >
+        <section role="tabpanel" id="panel-patient" aria-labelledby="tab-patient">
           <MyCaregiversList links={asPatient} />
         </section>
       )}

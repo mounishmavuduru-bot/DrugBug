@@ -40,41 +40,46 @@ export default function BriefPage() {
 
   return (
     <div className="space-y-5">
-      <header className="space-y-3">
+      <header className="space-y-4 border-b border-rule-strong pb-5">
         <Link
           href="/insights"
-          className="inline-flex items-center gap-1 text-xs text-muted transition-fast hover:text-text"
+          className="inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink"
         >
-          <ArrowLeft className="size-3.5" /> Insights
+          <ArrowLeft className="size-3.5" /> Back to your record
         </Link>
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">Appointment prep</h1>
-            <p className="text-xs text-muted">
-              Generate a clinician-ready brief from your meds, adherence, and logged effects.
+            <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+              For your visit
+            </p>
+            <h1 className="mt-1">Appointment brief</h1>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+              A one-page summary of your medications, on-time rate, and logged effects you can print
+              or hand to your provider.
             </p>
           </div>
           <Button
             variant="secondary"
+            size="sm"
             onClick={() => setFormOpen(true)}
             className="shrink-0"
             disabled={!me}
           >
-            <CalendarPlus className="size-4" /> New appointment
+            <CalendarPlus className="size-4" /> Add appointment
           </Button>
         </div>
       </header>
 
       {!ready ? (
-        <LoadingState label="Loading appointments…" />
+        <LoadingState rows={3} label="Loading appointments…" />
       ) : ordered.length === 0 ? (
         <EmptyState
           icon={FileText}
           title="No appointments yet"
-          description="Add an appointment, then generate a one-page brief to bring to your provider."
+          description="Add an appointment, then generate a brief from it to bring to your provider."
           action={
             <Button variant="primary" onClick={() => setFormOpen(true)} disabled={!me}>
-              <CalendarPlus className="size-4" /> New appointment
+              <CalendarPlus className="size-4" /> Add appointment
             </Button>
           }
         />
@@ -86,12 +91,11 @@ export default function BriefPage() {
         </div>
       )}
 
-      <div className="rounded-[var(--radius)] border border-border bg-elevated/30 p-3">
-        <p className="text-xs leading-relaxed text-muted">
-          Briefs are composed only from your logged data — current medications, 30-day
-          adherence, side effects with statistical associations, detected interactions, and
-          refill issues. They invent nothing and are meant to improve the conversation with
-          your provider.
+      <div className="rounded-[var(--radius-md)] border border-rule bg-surface p-4 print:hidden">
+        <p className="text-sm leading-relaxed text-muted">
+          A brief is built only from data you've logged: your current medications, 30-day on-time
+          rate, side effects with their statistical associations, detected interactions, and refill
+          problems. It doesn't add anything you didn't record.
         </p>
         <Disclaimer className="mt-2" />
       </div>

@@ -6,7 +6,7 @@ export function MedLegend({
   extra,
 }: {
   entries: { id: string; label: string; color: string }[];
-  /** Optional trailing entries (e.g. "Unattributed"). */
+  /** Optional trailing entries (e.g. "Not linked to a medication"). */
   extra?: { label: string; color: string }[];
 }) {
   if (entries.length === 0 && !extra?.length) return null;
@@ -15,17 +15,17 @@ export function MedLegend({
       {entries.map((e) => (
         <li key={e.id} className="flex items-center gap-1.5 text-xs text-muted">
           <span
-            className="inline-block size-2.5 shrink-0 rounded-sm"
+            className="inline-block size-2.5 shrink-0 rounded-[1px]"
             style={{ backgroundColor: e.color }}
             aria-hidden
           />
-          <span className="mono text-text">{e.label}</span>
+          <span className="label-mono text-ink">{e.label}</span>
         </li>
       ))}
       {extra?.map((e) => (
         <li key={e.label} className="flex items-center gap-1.5 text-xs text-muted">
           <span
-            className="inline-block size-2.5 shrink-0 rounded-sm"
+            className="inline-block size-2.5 shrink-0 rounded-[1px]"
             style={{ backgroundColor: e.color }}
             aria-hidden
           />

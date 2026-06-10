@@ -1,11 +1,10 @@
 "use client";
 
-import { Info, Scale, Database } from "lucide-react";
+import { Scale, Database } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/med/disclaimer";
 
-const APP_VERSION =
-  process.env.NEXT_PUBLIC_APP_VERSION || "0.1.0";
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || "0.1.0";
 
 const DATA_SOURCES = [
   "RxNorm (NLM)",
@@ -23,51 +22,49 @@ const DATA_SOURCES = [
  */
 export function AboutSection() {
   return (
-    <section className="space-y-3">
-      <h2 className="flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-        <Info className="size-3.5" /> About
+    <section className="space-y-3" aria-labelledby="about-heading">
+      <h2
+        id="about-heading"
+        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-faint"
+      >
+        About
       </h2>
 
-      <Card className="space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-text">DrugBug</p>
-          <span className="mono text-xs text-muted">v{APP_VERSION}</span>
+      <Card className="space-y-4 p-4">
+        <div className="flex items-baseline justify-between">
+          <p className="text-sm font-medium text-ink">DrugBug</p>
+          <span className="label-mono text-xs text-muted">v{APP_VERSION}</span>
         </div>
 
-        <div className="flex items-start gap-3 border-t border-border pt-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-elevated text-muted">
-            <Scale className="size-4" />
-          </div>
+        <div className="flex items-start gap-3 border-t border-rule pt-4">
+          <Scale className="mt-0.5 size-4 shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
           <div>
-            <p className="text-sm font-medium text-text">Regulatory &amp; safety</p>
-            <p className="mt-1 text-xs leading-snug text-muted">
-              DrugBug is decision-support, not a diagnosis. Pill identification,
-              counterfeit verdicts, and interaction/cascade analysis are
-              image- and model-based functions that may constitute Software as a
-              Medical Device; they are confidence-gated, surface uncertainty, and
-              must always be confirmed with a pharmacist or prescriber. DrugBug
-              makes no diagnostic claims and does not replace professional
-              judgement (PRD §16).
+            <p className="text-sm font-medium text-ink">Regulatory and safety</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              DrugBug is decision support, not a diagnosis. Pill identification,
+              counterfeit verdicts, and interaction analysis are image- and
+              model-based functions that may count as Software as a Medical Device.
+              They are gated on confidence, show their uncertainty, and should be
+              confirmed with a pharmacist or prescriber. DrugBug makes no diagnostic
+              claims (PRD §16).
             </p>
           </div>
         </div>
 
-        <div className="flex items-start gap-3 border-t border-border pt-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-elevated text-muted">
-            <Database className="size-4" />
-          </div>
+        <div className="flex items-start gap-3 border-t border-rule pt-4">
+          <Database className="mt-0.5 size-4 shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
           <div className="min-w-0">
-            <p className="text-sm font-medium text-text">Data sources</p>
-            <p className="mt-1 text-xs leading-snug text-muted">
-              Safety guidance draws on curated medical reference data. Model and
-              dataset versions are pinned and recorded with each result for
-              auditability (PRD §13/§18).
+            <p className="text-sm font-medium text-ink">Data sources</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              Safety guidance draws on curated medical reference data. The model and
+              dataset versions are pinned and recorded with each result so you can
+              audit it (PRD §13/§18).
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {DATA_SOURCES.map((s) => (
                 <span
                   key={s}
-                  className="rounded bg-elevated px-2 py-0.5 text-[11px] text-muted"
+                  className="label-mono rounded-[var(--radius-sm)] border border-rule bg-surface px-2 py-0.5 text-[11px] text-muted"
                 >
                   {s}
                 </span>
@@ -76,7 +73,7 @@ export function AboutSection() {
           </div>
         </div>
 
-        <div className="border-t border-border pt-3">
+        <div className="border-t border-rule pt-4">
           <Disclaimer />
         </div>
       </Card>

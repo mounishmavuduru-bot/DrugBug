@@ -40,7 +40,7 @@ export function CameraCapture({
       !navigator.mediaDevices?.getUserMedia
     ) {
       setState("error");
-      setErrorMsg("This device or browser doesn’t expose a camera. Upload a photo instead.");
+      setErrorMsg("This device or browser doesn't expose a camera. Upload a photo instead.");
       return;
     }
     setState("starting");
@@ -64,7 +64,7 @@ export function CameraCapture({
         setErrorMsg(
           name === "NotFoundError"
             ? "No camera found on this device. Upload a photo instead."
-            : "Couldn’t start the camera. Upload a photo instead."
+            : "Couldn't start the camera. Upload a photo instead."
         );
       }
     }
@@ -108,7 +108,7 @@ export function CameraCapture({
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-square w-full overflow-hidden rounded-[var(--radius)] border border-border bg-elevated">
+      <div className="relative aspect-square w-full overflow-hidden rounded-[var(--radius-md)] border border-rule bg-surface">
         {/* Video preview (only meaningful while live). */}
         <video
           ref={videoRef}
@@ -123,33 +123,35 @@ export function CameraCapture({
             type="button"
             onClick={stop}
             aria-label="Stop camera"
-            className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white transition-fast hover:bg-black/70"
+            className="absolute right-2 top-2 rounded-[var(--radius-pill)] bg-ink/70 p-1.5 text-paper transition-colors duration-150 ease-[var(--ease)] hover:bg-ink"
           >
-            <X className="size-4" />
+            <X className="size-4" aria-hidden />
           </button>
         ) : null}
 
         {state === "denied" ? (
           <div className="flex size-full flex-col items-center justify-center gap-2 p-6 text-center">
-            <CameraOff className="size-7 text-danger" />
-            <p className="text-sm font-medium text-text">Camera access blocked</p>
-            <p className="max-w-xs text-xs text-muted">
-              Allow camera access in your browser’s site settings, then try again — or upload a
+            <CameraOff className="size-7 text-danger" strokeWidth={1.75} aria-hidden />
+            <p className="text-sm font-medium text-ink">Camera access is blocked</p>
+            <p className="max-w-xs text-xs leading-relaxed text-muted">
+              Allow camera access in your browser&apos;s site settings, then try again — or upload a
               photo below.
             </p>
-            <Button variant="outline" size="sm" onClick={start} className="mt-1">
-              <RefreshCw className="size-4" /> Retry
+            <Button variant="secondary" size="sm" onClick={start} className="mt-1">
+              <RefreshCw className="size-4" aria-hidden /> Try again
             </Button>
           </div>
         ) : null}
 
         {(state === "idle" || state === "starting") ? (
           <div className="flex size-full flex-col items-center justify-center gap-3 p-6 text-center">
-            <div className="grid size-12 place-items-center rounded-full bg-surface text-primary">
-              <Camera className="size-6" />
+            <div className="grid size-12 place-items-center rounded-[var(--radius-md)] border border-rule bg-card text-brand">
+              <Camera className="size-6" strokeWidth={1.75} aria-hidden />
             </div>
-            <p className="text-xs text-muted">
-              {state === "starting" ? "Starting camera…" : "Point the rear camera at the bottle, pill, or barcode."}
+            <p className="max-w-xs text-xs leading-relaxed text-muted">
+              {state === "starting"
+                ? "Starting the camera…"
+                : "Point the rear camera at the bottle, pill, or barcode."}
             </p>
             <Button
               variant="primary"
@@ -157,7 +159,7 @@ export function CameraCapture({
               onClick={start}
               disabled={disabled || state === "starting"}
             >
-              <Camera className="size-4" /> Start camera
+              <Camera className="size-4" aria-hidden /> Start camera
             </Button>
           </div>
         ) : null}
@@ -167,7 +169,7 @@ export function CameraCapture({
             title="Camera unavailable"
             description={errorMsg ?? undefined}
             retry={start}
-            className="py-10"
+            className="size-full justify-center"
           />
         ) : null}
       </div>
@@ -179,15 +181,15 @@ export function CameraCapture({
           onClick={capture}
           disabled={disabled || state !== "live"}
         >
-          <Camera className="size-4" /> Capture
+          <Camera className="size-4" aria-hidden /> Capture
         </Button>
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={() => fileRef.current?.click()}
           disabled={disabled}
           aria-label="Upload a photo"
         >
-          <ImageUp className="size-4" /> Upload
+          <ImageUp className="size-4" aria-hidden /> Upload
         </Button>
         <input
           ref={fileRef}
@@ -214,12 +216,12 @@ export function CapturePreview({
 }) {
   return (
     <Card className="space-y-3 p-3">
-      <div className="relative aspect-square w-full overflow-hidden rounded-[var(--radius)] border border-border bg-elevated">
+      <div className="relative aspect-square w-full overflow-hidden rounded-[var(--radius-md)] border border-rule bg-surface">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt="Captured scan" className="size-full object-cover" />
+        <img src={url} alt="The photo you captured for this scan" className="size-full object-cover" />
       </div>
-      <Button variant="ghost" size="sm" onClick={onRetake} disabled={disabled} className="w-full">
-        <RefreshCw className="size-4" /> Retake
+      <Button variant="quiet" size="sm" onClick={onRetake} disabled={disabled} className="w-full">
+        <RefreshCw className="size-4" aria-hidden /> Retake
       </Button>
     </Card>
   );

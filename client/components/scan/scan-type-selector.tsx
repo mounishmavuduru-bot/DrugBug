@@ -21,8 +21,12 @@ export function ScanTypeSelector({
   disabled?: boolean;
 }) {
   return (
-    <div role="radiogroup" aria-label="Scan type" className="grid grid-cols-3 gap-2">
-      {SCAN_TYPES.map((t) => {
+    <div
+      role="radiogroup"
+      aria-label="Scan type"
+      className="grid grid-cols-3 overflow-hidden rounded-[var(--radius-sm)] border border-rule-strong bg-card"
+    >
+      {SCAN_TYPES.map((t, i) => {
         const Icon = ICONS[t.value];
         const active = value === t.value;
         return (
@@ -34,15 +38,20 @@ export function ScanTypeSelector({
             disabled={disabled}
             onClick={() => onChange(t.value)}
             className={cn(
-              "flex flex-col items-center gap-1.5 rounded-[var(--radius)] border p-3 text-center transition-fast outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-50",
+              "flex flex-col items-center gap-1.5 px-2 py-3 text-center transition-colors duration-150 ease-[var(--ease)] outline-none disabled:opacity-50",
+              i > 0 && "border-l border-rule",
               active
-                ? "border-primary/60 bg-primary/10 text-text"
-                : "border-border bg-surface text-muted hover:border-primary/30 hover:text-text"
+                ? "bg-brand-tint text-ink"
+                : "text-muted hover:bg-surface hover:text-ink"
             )}
           >
-            <Icon className={cn("size-5", active && "text-primary")} />
-            <span className="text-sm font-medium">{t.label}</span>
-            <span className="text-[11px] leading-tight text-muted">{t.hint}</span>
+            <Icon
+              className={cn("size-5", active ? "text-brand" : "text-faint")}
+              strokeWidth={1.75}
+              aria-hidden
+            />
+            <span className="text-[13px] font-medium">{t.label}</span>
+            <span className="text-[11px] leading-tight text-faint">{t.hint}</span>
           </button>
         );
       })}

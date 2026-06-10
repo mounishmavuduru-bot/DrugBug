@@ -23,7 +23,7 @@ interface LowMed {
 /**
  * Refill strip (PRD §9.1/§9.5). Any scheduled med whose remaining doses imply
  * < 7 days of supply shows a countdown + "Request refill" deep-link. No in-app
- * ordering — we only deep-link to the pharmacy when a number is known.
+ * ordering — we only deep-link to the pharmacy when a number is on file.
  */
 export function RefillStrip({ meds }: { meds: readonly Medication[] }) {
   const low: LowMed[] = meds
@@ -34,45 +34,50 @@ export function RefillStrip({ meds }: { meds: readonly Medication[] }) {
   if (low.length === 0) return null;
 
   return (
-    <section aria-label="Refills due soon" className="space-y-2">
-      <div className="flex items-center gap-2 px-1">
-        <PackageOpen className="size-4 text-warning" />
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
-          Refills due soon
+    <section aria-label="Refills running low" className="space-y-3">
+      <div className="flex items-center gap-2">
+        <PackageOpen className="size-4 text-monitor" strokeWidth={1.75} aria-hidden />
+        <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+          Running low
         </h2>
       </div>
-      <ul className="space-y-1.5">
+      <ul className="border-t border-rule-strong">
         {low.map(({ med, days }) => {
           const href = refillHref(med);
           return (
             <li
               key={med.medId.toString()}
-              className="surface flex items-center gap-3 rounded-[var(--radius)] border border-border p-3"
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-rule py-3"
             >
               <div className="min-w-0 flex-1">
-                <p className="mono truncate text-sm text-text">{med.name}</p>
-                <p className="mono truncate text-xs text-muted">
-                  {med.dosesRemaining} doses left
+                <p className="label-mono truncate text-sm text-ink">{med.name}</p>
+                <p className="label-mono truncate text-xs text-faint">
+                  <span className="tnum">{med.dosesRemaining}</span> doses left
                   {med.pharmacy ? ` · ${med.pharmacy}` : ""}
                 </p>
               </div>
-              <Badge variant={days <= 2 ? "danger" : "warning"} className="shrink-0">
+              <Badge variant={days <= 2 ? "danger" : "caution"} className="shrink-0">
                 {days <= 0
                   ? "Out today"
                   : days === 1
                     ? "1 day left"
-                    : `${days} days left`}
+                    : `${days} days of supply`}
               </Badge>
               {href ? (
                 <a href={href} className="shrink-0">
                   <Button variant="secondary" size="sm">
-                    <ExternalLink className="size-4" />
-                    Request refill
+                    <ExternalLink className="size-4" strokeWidth={1.75} aria-hidden />
+                    Call to refill
                   </Button>
                 </a>
               ) : (
-                <Button variant="secondary" size="sm" disabled title="No pharmacy contact on file">
-                  Request refill
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled
+                  title="No pharmacy number on file"
+                >
+                  Call to refill
                 </Button>
               )}
             </li>

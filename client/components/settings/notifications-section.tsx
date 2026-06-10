@@ -49,7 +49,7 @@ export function NotificationsSection({ me }: { me: Identity }) {
         // null => permission declined or VAPID not configured.
         if (typeof Notification !== "undefined" && Notification.permission === "denied") {
           setError(
-            "Notifications are blocked in your browser settings. Enable them for DrugBug and try again."
+            "Notifications are blocked in your browser settings. Allow them for DrugBug, then try again."
           );
         } else {
           setVapidMissing(true);
@@ -62,7 +62,7 @@ export function NotificationsSection({ me }: { me: Identity }) {
         platform: "web",
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn’t enable notifications. Try again.");
+      setError(e instanceof Error ? e.message : "Couldn't turn on reminders. Try again.");
     } finally {
       setBusy(false);
     }
@@ -76,24 +76,28 @@ export function NotificationsSection({ me }: { me: Identity }) {
       await unsubscribeWebPush();
       await removePush({ subId: mySub.subId });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn’t turn off notifications. Try again.");
+      setError(e instanceof Error ? e.message : "Couldn't turn off reminders. Try again.");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className="space-y-3">
-      <h2 className="flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-        <Bell className="size-3.5" /> Notifications
+    <section className="space-y-3" aria-labelledby="notifications-heading">
+      <h2
+        id="notifications-heading"
+        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-faint"
+      >
+        Notifications
       </h2>
 
-      <Card className="space-y-3">
+      <Card className="space-y-3 p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-text">Push reminders</p>
+            <p className="text-sm font-medium text-ink">Push reminders</p>
             <p className="mt-0.5 text-xs text-muted">
-              Dose reminders, predicted-miss nudges, refills, recalls, and caregiver alerts.
+              Dose times, predicted-miss nudges, refills, recalls, and caregiver
+              alerts on this device.
             </p>
           </div>
           {ready && supported ? (
@@ -101,64 +105,64 @@ export function NotificationsSection({ me }: { me: Identity }) {
               type="button"
               role="switch"
               aria-checked={enabled}
-              aria-label="Push notifications"
+              aria-label="Push reminders"
               disabled={busy}
               onClick={enabled ? disable : enable}
               className={[
-                "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-fast outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-50",
-                enabled ? "bg-primary" : "bg-elevated border border-border",
+                "relative inline-flex h-6 w-11 shrink-0 items-center rounded-[var(--radius-pill)] transition-colors duration-150 ease-[var(--ease)] outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50",
+                enabled ? "bg-brand" : "border border-rule-strong bg-surface",
               ].join(" ")}
             >
               <span
                 className={[
-                  "inline-block size-4 transform rounded-full bg-white transition-fast",
-                  enabled ? "translate-x-6" : "translate-x-1",
+                  "inline-block size-4 transform rounded-[var(--radius-pill)] transition-transform duration-150 ease-[var(--ease)]",
+                  enabled ? "translate-x-6 bg-brand-ink" : "translate-x-1 bg-muted",
                 ].join(" ")}
               />
               {busy ? (
-                <Loader2 className="absolute -right-6 size-3.5 animate-spin text-muted" />
+                <Loader2 className="absolute -right-6 size-3.5 animate-spin text-faint" />
               ) : null}
             </button>
           ) : null}
         </div>
 
         {!supported ? (
-          <p className="flex items-start gap-2 rounded-[var(--radius)] bg-elevated px-3 py-2 text-xs text-muted">
-            <Info className="mt-px size-3.5 shrink-0" />
-            Web Push isn’t supported in this browser. Install DrugBug as an app (iOS 16.4+,
-            Android, or desktop) to enable reminders, or use the native build.
+          <p className="flex items-start gap-2 rounded-[var(--radius-sm)] border border-rule bg-surface px-3 py-2 text-xs text-muted">
+            <Info className="mt-px size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+            This browser can't show web push. Install DrugBug as an app (iOS 16.4+,
+            Android, or desktop) to turn on reminders.
           </p>
         ) : null}
 
         {vapidMissing ? (
-          <p className="flex items-start gap-2 rounded-[var(--radius)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
-            <Info className="mt-px size-3.5 shrink-0" />
-            Push delivery isn’t configured on this deployment yet (no VAPID key). Once the
-            server is set up, you’ll be able to turn on reminders here.
+          <p className="flex items-start gap-2 rounded-[var(--radius-sm)] border border-rule-strong bg-monitor-tint px-3 py-2 text-xs text-monitor">
+            <Info className="mt-px size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+            Push delivery isn't set up on this deployment yet (no VAPID key). Once
+            the server has one, you can turn reminders on here.
           </p>
         ) : null}
 
         {error ? (
-          <p className="flex items-center gap-2 text-sm text-danger">
-            <AlertTriangle className="size-4 shrink-0" /> {error}
+          <p className="flex items-center gap-2 text-sm text-danger" role="alert">
+            <AlertTriangle className="size-4 shrink-0" strokeWidth={1.75} /> {error}
           </p>
         ) : null}
 
         {ready && supported && !vapidMissing ? (
           <div className="flex items-center gap-2 text-xs">
             {enabled ? (
-              <Badge variant="success">
-                <Bell className="size-3" /> On
+              <Badge variant="positive">
+                <Bell className="size-3" strokeWidth={1.75} /> On
               </Badge>
             ) : (
               <Badge variant="neutral">
-                <BellOff className="size-3" /> Off
+                <BellOff className="size-3" strokeWidth={1.75} /> Off
               </Badge>
             )}
             <span className="text-muted">
               {enabled
-                ? "This device will receive reminders."
-                : "Turn on to receive reminders on this device."}
+                ? "Reminders go to this device."
+                : "Turn on to get reminders on this device."}
             </span>
           </div>
         ) : null}

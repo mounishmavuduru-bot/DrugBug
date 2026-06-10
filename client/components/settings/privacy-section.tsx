@@ -2,15 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  Lock,
-  Dna,
-  ShieldCheck,
-  Info,
-  LogOut,
-  Loader2,
-  ChevronRight,
-} from "lucide-react";
+import { ShieldCheck, Info, LogOut, Loader2, ChevronRight } from "lucide-react";
 
 import { clearToken } from "@/lib/db";
 import { Card } from "@/components/ui/card";
@@ -34,54 +26,52 @@ export function PrivacySection() {
   }
 
   return (
-    <section className="space-y-3">
-      <h2 className="flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-        <Lock className="size-3.5" /> Privacy &amp; data
+    <section className="space-y-3" aria-labelledby="privacy-heading">
+      <h2
+        id="privacy-heading"
+        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-faint"
+      >
+        Privacy and data
       </h2>
 
-      <Card className="divide-y divide-border p-0">
+      <Card className="p-0">
         <Link
           href="/pharmacofit"
-          className="flex items-center gap-3 p-4 transition-fast hover:bg-elevated"
+          className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 ease-[var(--ease)] hover:bg-brand-tint focus-visible:bg-brand-tint"
         >
-          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-elevated text-primary">
-            <Dna className="size-4" />
-          </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-text">PharmacoFit consent</p>
-            <p className="text-xs text-muted">
-              Review or revoke consent for pharmacogenomic processing of your DNA.
+            <p className="text-sm font-medium text-ink">Pharmacogenomic consent</p>
+            <p className="mt-0.5 text-xs text-muted">
+              Review or revoke consent to process your DNA for medication matching.
             </p>
           </div>
-          <ChevronRight className="size-4 shrink-0 text-muted" />
+          <ChevronRight className="size-4 shrink-0 text-faint" strokeWidth={1.75} aria-hidden />
         </Link>
       </Card>
 
-      <Card className="space-y-3">
+      <Card className="space-y-3 p-4">
         <div className="flex items-start gap-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-elevated text-muted">
-            <ShieldCheck className="size-4" />
-          </div>
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
           <div>
-            <p className="text-sm font-medium text-text">How your data is protected</p>
-            <p className="mt-1 text-xs leading-snug text-muted">
-              Medication, dose, side-effect, scan, and genomic data are treated as
-              protected health information — encrypted at rest, with field-level
-              encryption for genomic and pharmacogenomic data, and TLS in transit
-              everywhere. Genomic data is never sold or shared and is deletable on
-              request (PRD §15).
+            <p className="text-sm font-medium text-ink">How your data is protected</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              Your medications, doses, side effects, scans, and genomic data are
+              treated as protected health information: encrypted at rest, with
+              field-level encryption for genomic and pharmacogenomic data, and TLS
+              in transit. Genomic data is never sold or shared, and you can delete
+              it on request (PRD §15).
             </p>
           </div>
         </div>
-        <p className="flex items-start gap-2 rounded-[var(--radius)] bg-elevated px-3 py-2 text-[11px] leading-snug text-muted">
-          <Info className="mt-px size-3.5 shrink-0" />
-          DrugBug provides decision-support only — it does not diagnose disease or
-          replace a pharmacist or prescriber. Every clinical-adjacent output is shown
-          with its confidence and the reminder to confirm with a professional.
+        <p className="flex items-start gap-2 rounded-[var(--radius-sm)] border border-rule bg-surface px-3 py-2 text-xs leading-relaxed text-muted">
+          <Info className="mt-px size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+          Decision support, not a diagnosis — confirm with your pharmacist or
+          prescriber. DrugBug shows the confidence behind each clinical result and
+          does not replace a professional.
         </p>
       </Card>
 
-      <Button variant="outline" className="w-full" onClick={() => setSignOutOpen(true)}>
+      <Button variant="secondary" className="w-full" onClick={() => setSignOutOpen(true)}>
         <LogOut className="size-4" /> Sign out
       </Button>
 
@@ -91,13 +81,13 @@ export function PrivacySection() {
         title="Sign out?"
       >
         <div className="space-y-4">
-          <p className="text-sm leading-snug text-muted">
-            Signing out clears this device’s session token. Your data stays safe in
-            the cloud and syncs back when you sign in again.
+          <p className="text-sm leading-relaxed text-muted">
+            This clears the session on this device. Your data stays in the cloud and
+            syncs back when you sign in again.
           </p>
           <div className="flex gap-2">
             <Button
-              variant="outline"
+              variant="secondary"
               className="flex-1"
               onClick={() => setSignOutOpen(false)}
               disabled={signingOut}
@@ -112,7 +102,7 @@ export function PrivacySection() {
             >
               {signingOut ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" /> Signing out…
+                  <Loader2 className="size-4 animate-spin" /> Signing out
                 </>
               ) : (
                 <>

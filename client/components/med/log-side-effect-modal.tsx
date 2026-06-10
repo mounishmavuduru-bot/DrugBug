@@ -52,7 +52,7 @@ export function LogSideEffectModal({
 
   const submit = async () => {
     if (!symptom.trim()) {
-      setError("Describe the symptom.");
+      setError("Describe what you felt.");
       return;
     }
     setSaving(true);
@@ -71,7 +71,7 @@ export function LogSideEffectModal({
       reset();
       onClose();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to log side effect.");
+      setError(e instanceof Error ? e.message : "Couldn't save that. Try again.");
     } finally {
       setSaving(false);
     }
@@ -81,7 +81,7 @@ export function LogSideEffectModal({
     <Modal open={open} onClose={onClose} title="Log a side effect">
       <div className="space-y-4">
         <p className="text-xs text-muted">
-          For <span className="mono text-text">{medName}</span>
+          For <span className="label-mono text-ink">{medName}</span>
         </p>
 
         <div>
@@ -90,12 +90,12 @@ export function LogSideEffectModal({
             id="se-symptom"
             value={symptom}
             onChange={(e) => setSymptom(e.target.value)}
-            placeholder="e.g. Headache, nausea, dizziness"
+            placeholder="e.g. headache, nausea, dizziness"
           />
         </div>
 
         <div>
-          <Label>Severity (1–5)</Label>
+          <Label>Severity, 1 to 5</Label>
           <div className="flex flex-wrap gap-2">
             {SEVERITY.map((s) => (
               <button
@@ -104,10 +104,10 @@ export function LogSideEffectModal({
                 onClick={() => setSeverity(s.value)}
                 aria-pressed={severity === s.value}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-fast",
+                  "rounded-[var(--radius-pill)] border px-3 py-1 text-xs font-medium transition-colors duration-150 ease-[var(--ease)]",
                   severity === s.value
-                    ? "border-primary/40 bg-primary/15 text-primary"
-                    : "border-border bg-elevated text-muted hover:text-text"
+                    ? "border-brand bg-brand text-brand-ink"
+                    : "border-rule-strong bg-card text-muted hover:bg-brand-tint hover:text-ink"
                 )}
               >
                 {s.label}
@@ -122,18 +122,18 @@ export function LogSideEffectModal({
             id="se-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Anything else worth noting for your prescriber."
+            placeholder="Anything else worth telling your prescriber."
           />
         </div>
 
-        {error ? <p className="text-xs text-danger">{error}</p> : null}
+        {error ? <p className="text-xs text-danger" role="alert">{error}</p> : null}
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="flex-1" onClick={onClose} disabled={saving}>
+          <Button variant="secondary" className="flex-1" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
           <Button className="flex-1" onClick={submit} disabled={saving}>
-            {saving ? <Loader2 className="size-4 animate-spin" /> : "Log side effect"}
+            {saving ? <Loader2 className="animate-spin" /> : "Save side effect"}
           </Button>
         </div>
       </div>

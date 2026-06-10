@@ -9,7 +9,6 @@ import { reducers, identityHex } from "@/lib/db";
 import { useMyIdentity, useScans, useConnected } from "@/lib/hooks";
 import { submitScan } from "@/lib/inference-client";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { LoadingState, ErrorState } from "@/components/shared/states";
 import { Disclaimer } from "@/components/med/disclaimer";
 import { CameraCapture, CapturePreview } from "@/components/scan/camera-capture";
@@ -33,7 +32,7 @@ const TERMINAL_OK = "complete";
  */
 export default function ScanPage() {
   return (
-    <Suspense fallback={<LoadingState label="Loading scan…" />}>
+    <Suspense fallback={<LoadingState label="Loading the scanner…" />}>
       <ScanFlow />
     </Suspense>
   );
@@ -105,7 +104,7 @@ function ScanFlow() {
     try {
       await enqueueScan({ imageRef: "(pending)", scanType });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn’t queue the scan. Try again.");
+      setError(e instanceof Error ? e.message : "Couldn't queue the scan. Try again.");
       setPhase("error");
     }
     // The new row arrives via subscription; an effect below picks it up and
@@ -171,7 +170,7 @@ function ScanFlow() {
     phase === "error"
       ? error
       : scanFailed
-        ? "The scan couldn’t be processed. Re-scan in better lighting or enter it manually."
+        ? "We couldn't read this scan. Re-scan in better lighting, or enter the medication by hand."
         : error;
 
   const startOver = useCallback(() => {
@@ -206,23 +205,25 @@ function ScanFlow() {
   }
 
   return (
-    <div className="space-y-5 pb-4">
-      <header>
-        <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-          <ScanLine className="size-5 text-primary" /> Scan
-        </h1>
-        <p className="text-xs text-muted">
-          Identify a medication and check its authenticity.
-          {intentAdd ? " On a confident match, you can add it to your list." : ""}
+    <div className="space-y-6 pb-4">
+      <header className="space-y-1">
+        <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+          Scan
+        </span>
+        <h1 className="text-3xl">Identify a medication</h1>
+        <p className="max-w-prose text-sm leading-relaxed text-muted">
+          Photograph a bottle, a loose pill, or a barcode. We read it, then run the authenticity
+          checks one layer at a time.
+          {intentAdd ? " On a confident match you can add it to your list." : ""}
         </p>
       </header>
 
       {/* ---------- Capture phase ---------- */}
       {(effectivePhase === "capture" || effectivePhase === "submitting") && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <section className="space-y-2">
-            <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-              Scan type
+            <h2 className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+              What are you scanning?
             </h2>
             <ScanTypeSelector
               value={scanType}
@@ -232,8 +233,8 @@ function ScanFlow() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-              {blob ? "Captured image" : "Capture"}
+            <h2 className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+              {blob ? "Your photo" : "Capture"}
             </h2>
             {blob && previewUrl ? (
               <CapturePreview url={previewUrl} onRetake={retake} disabled={phase === "submitting"} />
@@ -248,11 +249,13 @@ function ScanFlow() {
           ) : null}
 
           {error ? (
-            <Card className="border-danger/40">
-              <p className="flex items-center gap-2 text-sm text-danger">
-                <AlertTriangle className="size-4" /> {error}
-              </p>
-            </Card>
+            <p
+              role="alert"
+              className="flex items-start gap-2 rounded-[var(--radius-md)] border border-rule bg-danger-tint px-4 py-3 text-sm leading-relaxed text-danger"
+            >
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+              <span>{error}</span>
+            </p>
           ) : null}
 
           {blob ? (
@@ -265,10 +268,10 @@ function ScanFlow() {
               >
                 {phase === "submitting" ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Queuing scan…
+                    <Loader2 className="size-4 animate-spin" aria-hidden /> Queuing the scan…
                   </>
                 ) : (
-                  "Analyze scan"
+                  "Read this scan"
                 )}
               </Button>
               <Disclaimer />
@@ -281,38 +284,58 @@ function ScanFlow() {
 
       {/* ---------- Processing phase ---------- */}
       {effectivePhase === "processing" && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {previewUrl ? (
             <CapturePreview url={previewUrl} onRetake={() => {}} disabled />
           ) : null}
-          <Card className="flex flex-col items-center gap-3 py-10 text-center">
-            <Loader2 className="size-6 animate-spin text-primary" />
-            <div>
-              <p className="text-sm font-medium text-text">Analyzing your scan…</p>
-              <p className="mt-1 text-xs text-muted">
-                Running identification + authenticity layers. This usually takes a few seconds.
-              </p>
+          <div
+            className="rounded-[var(--radius-md)] border border-rule bg-card"
+            aria-busy="true"
+            aria-live="polite"
+          >
+            <div className="flex items-center gap-2.5 border-b border-rule px-4 py-3">
+              <Loader2 className="size-4 shrink-0 animate-spin text-brand" aria-hidden />
+              <p className="text-sm font-medium text-ink">Reading your scan</p>
             </div>
-          </Card>
+            {/* The steps the server is working through, shown as a quiet running list. */}
+            <ol className="text-sm text-muted">
+              {[
+                "Identifying the medication from the image",
+                "Decoding the barcode and checking the NDC",
+                "Cross-checking recalls and physical anomalies",
+              ].map((step) => (
+                <li
+                  key={step}
+                  className="flex items-baseline gap-2.5 border-b border-rule px-4 py-2.5 last:border-b-0"
+                >
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-[var(--radius-pill)] bg-rule-strong" aria-hidden />
+                  <span className="leading-relaxed">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="px-4 py-2.5 text-xs leading-relaxed text-faint">
+              This usually takes a few seconds.
+            </p>
+          </div>
           <Disclaimer />
         </div>
       )}
 
       {/* ---------- Complete phase ---------- */}
       {effectivePhase === "complete" && activeScan && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <ScanResult scan={activeScan} intentAdd={intentAdd} onAdd={handleAdd} />
-          <Button variant="outline" className="w-full" onClick={startOver}>
-            <ScanLine className="size-4" /> Scan another
+          <Button variant="secondary" className="w-full" onClick={startOver}>
+            <ScanLine className="size-4" aria-hidden /> Scan another
           </Button>
         </div>
       )}
 
       {/* ---------- Error phase ---------- */}
       {effectivePhase === "error" && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <ErrorState
-            title="Scan failed"
+            title="The scan didn't go through"
             description={failureMessage ?? undefined}
             retry={startOver}
           />

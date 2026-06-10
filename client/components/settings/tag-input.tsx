@@ -56,14 +56,14 @@ export function TagInput({
       <Label htmlFor={id}>{label}</Label>
       <div
         className={cn(
-          "flex flex-wrap items-center gap-1.5 rounded-[var(--radius)] border border-border bg-elevated p-2",
+          "flex flex-wrap items-center gap-1.5 rounded-[var(--radius-sm)] border border-rule-strong bg-card p-2 transition-colors duration-150 ease-[var(--ease)] focus-within:border-brand",
           disabled && "opacity-50"
         )}
       >
         {values.map((tag, i) => (
           <span
             key={`${tag}-${i}`}
-            className="mono inline-flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-xs text-text"
+            className="label-mono inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-brand-tint px-2 py-0.5 text-xs text-ink"
           >
             {tag}
             <button
@@ -71,9 +71,9 @@ export function TagInput({
               onClick={() => remove(i)}
               disabled={disabled}
               aria-label={`Remove ${tag}`}
-              className="rounded text-muted transition-fast hover:text-danger focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-danger/60"
+              className="rounded-[var(--radius-sm)] text-muted transition-colors duration-150 ease-[var(--ease)] hover:text-danger focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-danger"
             >
-              <X className="size-3" />
+              <X className="size-3" strokeWidth={2} />
             </button>
           </span>
         ))}
@@ -85,12 +85,13 @@ export function TagInput({
           onKeyDown={onKeyDown}
           onBlur={() => commit(draft)}
           placeholder={values.length === 0 ? placeholder : undefined}
-          className="min-w-24 flex-1 bg-transparent px-1 text-sm text-text placeholder:text-muted/70 outline-none disabled:cursor-not-allowed"
+          className="min-w-24 flex-1 bg-transparent px-1 text-sm text-ink placeholder:text-faint outline-none disabled:cursor-not-allowed"
           aria-label={label}
         />
       </div>
-      <p className="mt-1 flex items-center gap-1 text-[11px] text-muted">
-        <Plus className="size-3" aria-hidden /> {emptyHint ?? "Press Enter or comma to add."}
+      <p className="mt-1.5 flex items-center gap-1 text-[11px] text-faint">
+        <Plus className="size-3" strokeWidth={1.75} aria-hidden />{" "}
+        {emptyHint ?? "Press Enter or comma to add."}
       </p>
     </div>
   );

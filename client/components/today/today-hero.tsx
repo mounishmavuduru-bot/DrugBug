@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Check, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { clockTime, countdown } from "@/lib/format";
 import { isLate, type DoseWithMed } from "@/components/today/today-utils";
 
@@ -16,7 +15,9 @@ function greeting(d: Date): string {
 
 /**
  * Today hero (PRD §9.1): greeting, live current time, and the next pending dose
- * with a live countdown + a one-tap Take action.
+ * with a live countdown + a one-tap Take action. The next dose is the dominant
+ * element on the day — the drug name reads at display size, with the countdown
+ * as the headline figure.
  */
 export function TodayHero({
   name,
@@ -40,14 +41,14 @@ export function TodayHero({
   const late = next ? isLate(next.scheduledAt, now) : false;
 
   return (
-    <div className="surface rounded-[var(--radius)] border border-border p-5">
+    <header className="border-b border-rule-strong pb-6">
       <div className="flex items-baseline justify-between gap-3">
-        <h1 className="text-lg font-semibold tracking-tight text-text">
+        <p className="text-sm text-muted">
           {greeting(now)}
-          {firstName ? <span className="text-muted">, {firstName}</span> : null}
-        </h1>
+          {firstName ? <span className="text-ink">, {firstName}</span> : null}
+        </p>
         <time
-          className="mono text-sm text-muted"
+          className="label-mono tnum text-xs text-faint"
           dateTime={now.toISOString()}
           suppressHydrationWarning
         >
@@ -56,41 +57,56 @@ export function TodayHero({
       </div>
 
       {next ? (
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs text-muted">Next dose</p>
-            <p className="mono mt-0.5 truncate text-sm text-text">
-              {next.med?.name ?? "Medication"}
-              {next.med?.strength ? (
-                <span className="text-muted"> · {next.med.strength}</span>
-              ) : null}
-            </p>
-            <div className="mt-1.5 flex items-center gap-2">
-              <span className="mono inline-flex items-center gap-1 text-xs text-muted">
-                <Clock className="size-3" />
-                {clockTime(next.scheduledAt)}
-              </span>
-              <Badge variant={late ? "warning" : "primary"}>
-                {late ? "Overdue" : countdown(next.scheduledAt)}
-              </Badge>
+        <div className="mt-4">
+          <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+            {late ? "Overdue dose" : "Next dose"}
+          </p>
+
+          {/* Dominant line: the countdown is the day's headline figure. */}
+          <h1 className="mt-2 whitespace-nowrap font-display text-[2.75rem] leading-[0.95] tracking-tight text-ink">
+            {late ? (
+              <span className="text-caution">Overdue</span>
+            ) : (
+              <span className="tnum">{countdown(next.scheduledAt)}</span>
+            )}
+          </h1>
+
+          <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+            <div className="min-w-0">
+              <p className="label-mono truncate text-base text-ink">
+                {next.med?.name ?? "Medication"}
+                {next.med?.strength ? (
+                  <span className="text-muted"> · {next.med.strength}</span>
+                ) : null}
+              </p>
+              <p className="label-mono mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
+                <Clock className="size-3.5" strokeWidth={1.75} aria-hidden />
+                scheduled {clockTime(next.scheduledAt)}
+              </p>
             </div>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => onTake(next)}
+              disabled={taking}
+              className="shrink-0"
+              aria-label={`Mark ${next.med?.name ?? "next dose"} as taken`}
+            >
+              <Check className="size-4" strokeWidth={1.75} />
+              Take it now
+            </Button>
           </div>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => onTake(next)}
-            disabled={taking}
-            aria-label={`Take ${next.med?.name ?? "next dose"}`}
-          >
-            <Check className="size-4" />
-            Take
-          </Button>
         </div>
       ) : (
-        <p className="mono mt-4 text-sm text-muted">
-          No more pending doses today.
-        </p>
+        <div className="mt-4">
+          <h1 className="font-display text-3xl leading-tight text-ink">
+            You&apos;re clear for the rest of today
+          </h1>
+          <p className="mt-2 text-sm text-muted">
+            Nothing else is due. Doses you&apos;ve already taken are in the chart below.
+          </p>
+        </div>
       )}
-    </div>
+    </header>
   );
 }

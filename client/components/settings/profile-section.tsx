@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { User, Save, Loader2, AlertTriangle, Check, Copy, Fingerprint } from "lucide-react";
+import { Save, Loader2, AlertTriangle, Check, Copy } from "lucide-react";
 import { useReducer } from "spacetimedb/react";
 import { Identity } from "spacetimedb";
 
 import { reducers, identityHex } from "@/lib/db";
 import { tsToDate, toTs, dayLabel } from "@/lib/format";
 import { useMyProfile } from "@/lib/hooks";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { TagInput } from "@/components/settings/tag-input";
@@ -68,7 +68,16 @@ export function ProfileSection({
     JSON.stringify(conditions) !== JSON.stringify(profile.conditions) ||
     JSON.stringify(allergies) !== JSON.stringify(profile.allergies);
 
+  // Inline validation, evaluated as you type.
+  const nameError = fullName.trim() === "" ? "Enter your name." : null;
+  const weightError =
+    weight !== "" && (Number.isNaN(Number(weight)) || Number(weight) < 0)
+      ? "Weight must be a positive number."
+      : null;
+  const canSave = dirty && !nameError && !weightError && !saving;
+
   async function handleSave() {
+    if (nameError || weightError) return;
     setSaving(true);
     setError(null);
     setSaved(false);
@@ -89,7 +98,7 @@ export function ProfileSection({
       });
       setSaved(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn’t save your profile. Try again.");
+      setError(e instanceof Error ? e.message : "Couldn't save your profile. Try again.");
     } finally {
       setSaving(false);
     }
@@ -106,12 +115,15 @@ export function ProfileSection({
   }
 
   return (
-    <section className="space-y-3">
-      <h2 className="flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-        <User className="size-3.5" /> Profile
+    <section className="space-y-3" aria-labelledby="profile-heading">
+      <h2
+        id="profile-heading"
+        className="label-mono px-1 text-[11px] uppercase tracking-[0.14em] text-faint"
+      >
+        Profile
       </h2>
 
-      <Card className="space-y-4">
+      <Card className="space-y-4 p-4">
         <div>
           <Label htmlFor="fullName">Full name</Label>
           <Input
@@ -120,7 +132,12 @@ export function ProfileSection({
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Your name"
             autoComplete="name"
+            disabled={saving}
+            aria-invalid={!!nameError}
           />
+          {nameError ? (
+            <p className="mt-1.5 text-xs text-danger">{nameError}</p>
+          ) : null}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -132,6 +149,7 @@ export function ProfileSection({
               value={dob}
               max={toDateInput(new Date())}
               onChange={(e) => setDob(e.target.value)}
+              disabled={saving}
             />
           </div>
           <div>
@@ -145,7 +163,12 @@ export function ProfileSection({
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               placeholder="e.g. 72.5"
+              disabled={saving}
+              aria-invalid={!!weightError}
             />
+            {weightError ? (
+              <p className="mt-1.5 text-xs text-danger">{weightError}</p>
+            ) : null}
           </div>
         </div>
 
@@ -165,29 +188,29 @@ export function ProfileSection({
           onChange={setAllergies}
           placeholder="Add an allergy (e.g. penicillin)"
           disabled={saving}
-          emptyHint="Drug + other allergies. Press Enter or comma to add."
+          emptyHint="Drug and other allergies. Press Enter or comma to add."
         />
 
         {error ? (
-          <p className="flex items-center gap-2 text-sm text-danger">
-            <AlertTriangle className="size-4 shrink-0" /> {error}
+          <p className="flex items-center gap-2 text-sm text-danger" role="alert">
+            <AlertTriangle className="size-4 shrink-0" strokeWidth={1.75} /> {error}
           </p>
         ) : null}
 
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] text-muted">
+        <div className="flex items-center justify-between gap-2 border-t border-rule pt-3">
+          <p className="text-xs text-muted">
             {saved && !dirty ? (
-              <span className="flex items-center gap-1 text-success">
-                <Check className="size-3" /> Saved
+              <span className="flex items-center gap-1 text-positive">
+                <Check className="size-3.5" strokeWidth={2} /> Saved
               </span>
             ) : (
-              "Profile data is encrypted at rest (PRD §15)."
+              "Stored encrypted. Used to check your doses and interactions."
             )}
           </p>
-          <Button onClick={handleSave} disabled={saving || !dirty} size="sm">
+          <Button onClick={handleSave} disabled={!canSave} size="sm">
             {saving ? (
               <>
-                <Loader2 className="size-4 animate-spin" /> Saving…
+                <Loader2 className="size-4 animate-spin" /> Saving
               </>
             ) : (
               <>
@@ -199,29 +222,34 @@ export function ProfileSection({
       </Card>
 
       {/* Read-only account facts. */}
-      <Card className="space-y-3">
-        <div className="flex items-start justify-between gap-2">
+      <Card className="space-y-3 p-4">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <Label className="mb-1 flex items-center gap-1.5">
-              <Fingerprint className="size-3.5" /> Identity
-            </Label>
-            <p className="mono break-all text-xs text-muted" title={hex}>
+            <Label className="mb-1">Identity</Label>
+            <p className="label-mono break-all text-xs text-muted" title={hex}>
               {hex}
+            </p>
+            <p className="mt-1.5 text-xs text-faint">
+              Your account address. Read-only — share it to link a caregiver.
             </p>
           </div>
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="icon"
             onClick={copyHex}
             aria-label="Copy identity"
             className="shrink-0"
           >
-            {copied ? <Check className="size-4 text-success" /> : <Copy className="size-4" />}
+            {copied ? (
+              <Check className="size-4 text-positive" strokeWidth={2} />
+            ) : (
+              <Copy className="size-4" />
+            )}
           </Button>
         </div>
-        <CardContent className="text-xs text-muted">
+        <p className="border-t border-rule pt-3 text-xs text-faint">
           Account created {createdDate ? dayLabel(createdDate) : "—"}.
-        </CardContent>
+        </p>
       </Card>
     </section>
   );

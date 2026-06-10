@@ -84,7 +84,10 @@ function InviteCaregiverModal({
         <div>
           <Label htmlFor="caregiver-email">Caregiver email</Label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
+            <Mail
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint"
+              strokeWidth={1.75}
+            />
             <Input
               id="caregiver-email"
               type="email"
@@ -95,22 +98,24 @@ function InviteCaregiverModal({
               autoFocus
             />
           </div>
-          <p className="mt-1 text-[11px] text-muted">
-            In the live product an invite is emailed. Here, the pending link&apos;s ID is shown so you
-            can share it directly.
+          <p className="mt-1.5 text-[11px] leading-relaxed text-muted">
+            In the live product the invite is emailed. Here, the pending link&apos;s ID shows up below
+            so you can pass it along directly.
           </p>
         </div>
 
         <fieldset className="space-y-1.5">
-          <legend className="mb-1.5 block text-xs font-medium text-muted">Access level</legend>
+          <legend className="mb-1.5 block text-xs font-medium uppercase tracking-[0.1em] text-muted">
+            Access level
+          </legend>
           <div className="space-y-1.5">
             {ACCESS_LEVELS.map((a) => (
               <label
                 key={a.value}
-                className={`flex cursor-pointer items-start gap-2.5 rounded-[var(--radius)] border p-2.5 transition-fast ${
+                className={`flex cursor-pointer items-start gap-2.5 rounded-[var(--radius-sm)] border p-2.5 transition-colors duration-150 ease-[var(--ease)] ${
                   level === a.value
-                    ? "border-primary/50 bg-primary/10"
-                    : "border-border bg-elevated hover:border-primary/30"
+                    ? "border-brand bg-brand-tint"
+                    : "border-rule bg-surface hover:border-rule-strong"
                 }`}
               >
                 <input
@@ -119,10 +124,10 @@ function InviteCaregiverModal({
                   value={a.value}
                   checked={level === a.value}
                   onChange={() => setLevel(a.value)}
-                  className="mt-0.5 accent-[var(--color-primary)]"
+                  className="mt-0.5 accent-[var(--color-brand)]"
                 />
                 <span className="min-w-0">
-                  <span className="block text-xs font-medium text-text">{a.label}</span>
+                  <span className="block text-xs font-medium text-ink">{a.label}</span>
                   <span className="block text-[11px] text-muted">{a.blurb}</span>
                 </span>
               </label>
@@ -131,17 +136,20 @@ function InviteCaregiverModal({
         </fieldset>
 
         {error ? (
-          <p className="rounded-[var(--radius)] border border-danger/30 bg-danger/10 p-2 text-xs text-danger">
+          <p
+            className="rounded-[var(--radius-sm)] border border-rule bg-danger-tint p-2 text-xs text-danger"
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" size="md" onClick={handleClose} disabled={busy}>
+          <Button type="button" variant="quiet" size="md" onClick={handleClose} disabled={busy}>
             Cancel
           </Button>
           <Button type="submit" variant="primary" size="md" disabled={busy}>
-            <UserPlus className="size-4" />
+            <UserPlus className="size-4" strokeWidth={1.75} />
             {busy ? "Sending…" : "Send invite"}
           </Button>
         </div>
@@ -171,7 +179,7 @@ function AcceptLinkForm() {
       try {
         linkId = BigInt(trimmed);
       } catch {
-        setError("That doesn't look like a valid link ID (it should be a number).");
+        setError("That doesn't look like a valid link ID — it should be a number.");
         return;
       }
       setBusy(true);
@@ -190,36 +198,43 @@ function AcceptLinkForm() {
   );
 
   return (
-    <Card className="space-y-2">
-      <div>
-        <h3 className="text-sm font-semibold text-text">Accept a caregiver invite</h3>
-        <p className="text-xs text-muted">
+    <Card>
+      <div className="border-b border-rule px-4 py-3">
+        <h3>Accept a caregiver invite</h3>
+        <p className="mt-0.5 text-xs text-muted">
           Someone shared a link ID with you? Paste it here to start caring for them.
         </p>
       </div>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row">
-        <Input
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setDone(false);
-          }}
-          placeholder="Link ID, e.g. 42"
-          inputMode="numeric"
-          aria-label="Caregiver link ID"
-        />
-        <Button type="submit" variant="secondary" size="md" disabled={busy} className="shrink-0">
-          <Check className="size-4" />
-          {busy ? "Accepting…" : "Accept"}
-        </Button>
-      </form>
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
-      {done ? (
-        <p className="flex items-center gap-1.5 text-xs text-success">
-          <Check className="size-3.5" /> Accepted — the patient now appears under &quot;I&apos;m a
-          caregiver&quot;.
-        </p>
-      ) : null}
+      <div className="space-y-2 px-4 py-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setDone(false);
+            }}
+            placeholder="Link ID, e.g. 42"
+            inputMode="numeric"
+            aria-label="Caregiver link ID"
+            className="label-mono"
+          />
+          <Button type="submit" variant="secondary" size="md" disabled={busy} className="shrink-0">
+            <Check className="size-4" strokeWidth={1.75} />
+            {busy ? "Accepting…" : "Accept"}
+          </Button>
+        </form>
+        {error ? (
+          <p className="text-xs text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
+        {done ? (
+          <p className="flex items-center gap-1.5 text-xs text-positive">
+            <Check className="size-3.5" strokeWidth={1.75} /> Accepted. The patient now appears under
+            &quot;I&apos;m a caregiver&quot;.
+          </p>
+        ) : null}
+      </div>
     </Card>
   );
 }
@@ -258,60 +273,70 @@ function LinkRow({ link }: { link: CaregiverLink }) {
   }, [revoke, link.linkId]);
 
   return (
-    <Card className="space-y-2.5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-text">
-            {link.caregiverEmail || "Caregiver"}
-          </p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <StatusBadge status={link.status} />
-            <AccessBadge level={link.accessLevel} />
+    <Card>
+      <div className="space-y-2.5 px-4 py-3.5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-ink">
+              {link.caregiverEmail || "Caregiver"}
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <StatusBadge status={link.status} />
+              <AccessBadge level={link.accessLevel} />
+            </div>
           </div>
-        </div>
-        {isActive ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRevoke}
-            disabled={busy}
-            className="shrink-0 text-danger hover:bg-danger/10 hover:text-danger"
-            aria-label={`Revoke ${link.caregiverEmail || "caregiver"}`}
-          >
-            <Trash2 className="size-4" />
-            {busy ? "Revoking…" : "Revoke"}
-          </Button>
-        ) : (
-          <Badge variant="neutral" className="shrink-0">
-            <ShieldOff className="size-3" /> Revoked
-          </Badge>
-        )}
-      </div>
-
-      {link.status === "pending" ? (
-        <div className="rounded-[var(--radius)] border border-border bg-elevated p-2.5">
-          <p className="text-[11px] text-muted">
-            Share this link ID with the caregiver so they can accept:
-          </p>
-          <div className="mt-1.5 flex items-center gap-2">
-            <code className="mono flex-1 truncate rounded bg-background px-2 py-1 text-xs text-text">
-              {linkId}
-            </code>
+          {isActive ? (
             <Button
-              variant="outline"
+              variant="quiet"
               size="sm"
-              onClick={handleCopy}
-              aria-label="Copy link ID"
-              className="shrink-0"
+              onClick={handleRevoke}
+              disabled={busy}
+              className="shrink-0 text-danger hover:bg-danger-tint hover:text-danger"
+              aria-label={`Revoke ${link.caregiverEmail || "caregiver"}`}
             >
-              {copied ? <Check className="size-4 text-success" /> : <Copy className="size-4" />}
-              {copied ? "Copied" : "Copy"}
+              <Trash2 className="size-4" strokeWidth={1.75} />
+              {busy ? "Revoking…" : "Revoke"}
             </Button>
-          </div>
+          ) : (
+            <Badge variant="outline" className="shrink-0">
+              <ShieldOff className="size-3" strokeWidth={1.75} /> Revoked
+            </Badge>
+          )}
         </div>
-      ) : null}
 
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+        {link.status === "pending" ? (
+          <div className="rounded-[var(--radius-sm)] border border-rule bg-surface p-2.5">
+            <p className="text-[11px] text-muted">
+              Share this link ID so the caregiver can accept:
+            </p>
+            <div className="mt-1.5 flex items-center gap-2">
+              <code className="label-mono flex-1 truncate rounded-[var(--radius-sm)] border border-rule bg-card px-2 py-1 text-xs text-ink">
+                {linkId}
+              </code>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleCopy}
+                aria-label="Copy link ID"
+                className="shrink-0"
+              >
+                {copied ? (
+                  <Check className="size-4 text-positive" strokeWidth={1.75} />
+                ) : (
+                  <Copy className="size-4" strokeWidth={1.75} />
+                )}
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
+        {error ? (
+          <p className="text-xs text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
     </Card>
   );
 }
@@ -326,21 +351,22 @@ export function MyCaregiversList({ links }: { links: readonly CaregiverLink[] })
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-semibold text-text">Caregivers you&apos;ve invited</h2>
-          <p className="text-xs text-muted">People who can see (and optionally help manage) your meds.</p>
-        </div>
+      <div className="flex items-end justify-between gap-3 border-b border-rule pb-1.5">
+        <h2 className="text-xl">Caregivers you&apos;ve invited</h2>
         <Button
           variant="primary"
           size="sm"
           onClick={() => setInviteOpen(true)}
           className="shrink-0"
         >
-          <UserPlus className="size-4" />
+          <UserPlus className="size-4" strokeWidth={1.75} />
           Add a caregiver
         </Button>
       </div>
+      <p className="-mt-2 text-sm text-muted">
+        Each person sees what their access level allows — view only, log doses, or manage your
+        medication list. You can revoke any of them at any time.
+      </p>
 
       {inviteError ? (
         <ErrorState
@@ -357,7 +383,7 @@ export function MyCaregiversList({ links }: { links: readonly CaregiverLink[] })
           description="Invite a family member or carer to help keep an eye on your medications."
           action={
             <Button variant="primary" size="md" onClick={() => setInviteOpen(true)}>
-              <UserPlus className="size-4" />
+              <UserPlus className="size-4" strokeWidth={1.75} />
               Add a caregiver
             </Button>
           }

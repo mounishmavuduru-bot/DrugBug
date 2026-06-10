@@ -4,9 +4,18 @@
 // whose *results* arrive via realtime subscriptions. Synchronous helpers
 // (RxNorm autocomplete, pre-commit interaction check) return JSON directly.
 
-const BASE = process.env.NEXT_PUBLIC_INFERENCE_URL || "http://localhost:8000";
+// Empty when unset (e.g. on Vercel where the inference service isn't deployed):
+// callers all wrap these in try/catch and degrade to the KB/overlay paths, so the
+// shipped bundle never contains a localhost URL. Set NEXT_PUBLIC_INFERENCE_URL in
+// .env.local for local dev against the FastAPI service.
+const BASE = process.env.NEXT_PUBLIC_INFERENCE_URL || "";
+
+function ensureConfigured() {
+  if (!BASE) throw new Error("inference service not configured");
+}
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  ensureConfigured();
   const res = await fetch(`${BASE}${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
@@ -81,6 +90,7 @@ export async function submitScan(params: {
   scanType: "bottle" | "pill" | "barcode";
   image: Blob;
 }): Promise<ScanResponse> {
+  ensureConfigured();
   const form = new FormData();
   form.append("scan_id", params.scanId.toString());
   form.append("identity", params.identityHex);
@@ -112,6 +122,7 @@ export async function uploadGenotype(params: {
   identityHex: string;
   file: File;
 }): Promise<{ status: string }> {
+  ensureConfigured();
   const form = new FormData();
   form.append("identity", params.identityHex);
   form.append("file", params.file, params.file.name);

@@ -2,16 +2,20 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+// Status chips. The pill radius is intentional here — it's a medication app.
+// Tinted, restrained, used for state (taken/missed/severity), never decoration.
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+  "inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium leading-5",
   {
     variants: {
       variant: {
-        neutral: "bg-elevated text-muted border border-border",
-        primary: "bg-primary/15 text-primary border border-primary/30",
-        success: "bg-success/15 text-success border border-success/30",
-        warning: "bg-warning/15 text-warning border border-warning/30",
-        danger: "bg-danger/15 text-danger border border-danger/30",
+        neutral: "bg-brand-tint text-muted",
+        brand: "bg-brand text-brand-ink",
+        positive: "bg-positive-tint text-positive",
+        monitor: "bg-monitor-tint text-monitor",
+        caution: "bg-[color:var(--color-monitor-tint)] text-caution",
+        danger: "bg-danger-tint text-danger",
+        outline: "border border-rule-strong text-muted",
       },
     },
     defaultVariants: { variant: "neutral" },

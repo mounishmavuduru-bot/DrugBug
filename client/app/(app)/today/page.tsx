@@ -7,6 +7,7 @@ import { useReducer } from "spacetimedb/react";
 import { reducers, identityHex } from "@/lib/db";
 import { useMyIdentity, useMyMeds, useMyProfile, useDoses } from "@/lib/hooks";
 import { adherenceForecast } from "@/lib/inference-client";
+import { dayLabel } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { LoadingState, EmptyState, ErrorState } from "@/components/shared/states";
 import { TodayHero } from "@/components/today/today-hero";
@@ -47,6 +48,9 @@ export default function TodayPage() {
   );
 
   const next = useMemo(() => nextPending(rows), [rows]);
+
+  // Label for the chart date. Memoized so it's stable within a render pass.
+  const today = useMemo(() => new Date(), []);
 
   // ---- predictive nudge (best-effort; ok if the service is unreachable) ----
   useEffect(() => {
@@ -127,13 +131,13 @@ export default function TodayPage() {
     return (
       <EmptyState
         icon={CalendarCheck}
-        title="No medications yet"
-        description="Add your first medication to start tracking doses, reminders, and refills."
+        title="Your chart is empty"
+        description="Add a medication and your day fills in here — every dose, when it's due, and what's running low."
         action={
           <Link href="/meds/add">
             <Button variant="primary" size="md">
-              <Plus className="size-4" />
-              Add medication
+              <Plus className="size-4" strokeWidth={1.75} />
+              Add a medication
             </Button>
           </Link>
         }
@@ -143,8 +147,10 @@ export default function TodayPage() {
 
   const recoveryMed: Medication | undefined = recoveryFor?.med;
 
+  const dueCount = rows.filter((r) => r.dose.status === "pending").length;
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       <TodayHero
         name={profile?.fullName}
         next={next}
@@ -168,21 +174,36 @@ export default function TodayPage() {
 
       {error ? (
         <ErrorState
-          title="Couldn’t update that dose"
+          title="That dose didn’t save"
           description={error}
           retry={() => setError(null)}
         />
       ) : null}
 
-      <section aria-label="Today’s schedule" className="space-y-2">
-        <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-          Today’s schedule
-        </h2>
+      <section aria-label="Today’s dose chart" className="space-y-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+            Dose chart
+            {dueCount > 0 ? (
+              <span className="ml-2 text-ink">
+                {dueCount} <span className="text-muted">still due</span>
+              </span>
+            ) : (
+              <span className="ml-2 text-positive">all marked</span>
+            )}
+          </h2>
+          <span
+            className="label-mono tnum text-xs text-faint"
+            suppressHydrationWarning
+          >
+            {dayLabel(today)}
+          </span>
+        </div>
         {rows.length === 0 ? (
           <EmptyState
             icon={CalendarCheck}
-            title="Nothing scheduled today"
-            description="Your active medications have no doses scheduled for today."
+            title="No doses scheduled today"
+            description="None of your active medications fall on today. PRN medications don’t appear here until you log them from the meds list."
           />
         ) : (
           <DoseTimeline

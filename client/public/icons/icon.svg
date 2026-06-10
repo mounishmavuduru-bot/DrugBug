@@ -1,8 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0A0E1A"/>
-  <g transform="translate(256 256) rotate(45)">
-    <rect x="-150" y="-70" width="300" height="140" rx="70" fill="#06B6D4"/>
-    <rect x="-150" y="-70" width="150" height="140" rx="70" fill="#0891B2"/>
-    <line x1="0" y1="-70" x2="0" y2="70" stroke="#0A0E1A" stroke-width="10"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="DrugBug">
+  <rect width="512" height="512" rx="96" fill="#f4efe4"/>
+  <!-- capsule, split: brand green + paper, like a two-tone pill on a label -->
+  <g transform="translate(256 256) rotate(-38)">
+    <rect x="-140" y="-66" width="280" height="132" rx="66" fill="#15402e"/>
+    <path d="M -140 0 a 66 66 0 0 1 66 -66 L 0 -66 L 0 66 L -74 66 a 66 66 0 0 1 -66 -66 Z" fill="#fbf8f0"/>
+    <line x1="0" y1="-66" x2="0" y2="66" stroke="#15402e" stroke-width="8"/>
   </g>
 </svg>

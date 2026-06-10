@@ -1,15 +1,15 @@
 {
-  "name": "DrugBug — Medication safety",
+  "name": "DrugBug — know what you take",
   "short_name": "DrugBug",
-  "description": "Reminders, interaction-cascade detection, pill verification, and pharmacogenomic personalization.",
+  "description": "A medication record that catches dangerous drug combinations, verifies your pills, and reads your pharmacogenomics.",
   "id": "/",
   "start_url": "/today",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0A0E1A",
-  "theme_color": "#0A0E1A",
-  "categories": ["medical", "health", "productivity"],
+  "background_color": "#f4efe4",
+  "theme_color": "#15402e",
+  "categories": ["medical", "health"],
   "icons": [
     { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]

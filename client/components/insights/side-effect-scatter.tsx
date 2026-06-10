@@ -13,10 +13,15 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 import { Stethoscope } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardEyebrow, CardTitle, CardDescription } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/states";
 import { MedLegend } from "@/components/insights/med-legend";
 import type { ScatterPoint } from "@/components/insights/insights-utils";
+
+// Monograph chart palette.
+const GRID = "#e0d7c4";
+const AXIS = "#6a6052";
+const UNATTRIBUTED_COLOR = "#938975"; // faint warm grey — no med attribution
 
 interface SeriesEntry {
   id: string;
@@ -24,8 +29,6 @@ interface SeriesEntry {
   color: string;
   points: ScatterPoint[];
 }
-
-const UNATTRIBUTED_COLOR = "#64748b";
 
 function ScatterTooltip({
   active,
@@ -38,20 +41,20 @@ function ScatterTooltip({
   const p = payload[0]?.payload;
   if (!p) return null;
   return (
-    <div className="surface rounded-md border border-border px-3 py-2 text-xs shadow-lg">
-      <p className="font-medium text-text">{p.symptom}</p>
+    <div className="rounded-[var(--radius-sm)] border border-rule-strong bg-card px-3 py-2 text-xs">
+      <p className="font-medium text-ink">{p.symptom}</p>
       <p className="text-muted">
-        Severity <span className="mono text-text">{p.severity}/5</span>
+        Severity <span className="label-mono tnum text-ink">{p.severity}/5</span>
       </p>
       <p className="text-muted">{p.when}</p>
-      {p._med ? <p className="mono text-text">{p._med}</p> : null}
+      {p._med ? <p className="label-mono text-ink">{p._med}</p> : null}
     </div>
   );
 }
 
 /**
  * Side-effect severity over time, one series per medication (PRD §10.3).
- * x = time, y = severity (1..5), color = med. Unattributed logs render gray.
+ * x = time, y = severity (1..5), color = med. Unattributed logs render grey.
  */
 export function SideEffectScatter({
   series,
@@ -76,8 +79,12 @@ export function SideEffectScatter({
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Side effects over time</CardTitle>
-          <CardDescription>Logged severity (1–5), color-coded by medication</CardDescription>
+          <CardEyebrow>Symptoms · severity</CardEyebrow>
+          <CardTitle className="mt-1">Side effects over time</CardTitle>
+          <CardDescription>
+            One dot per logged symptom, placed by date and how strong it was. Higher up the chart is
+            more severe.
+          </CardDescription>
         </div>
       </CardHeader>
 
@@ -85,22 +92,23 @@ export function SideEffectScatter({
         <EmptyState
           icon={Stethoscope}
           title="No side effects logged"
-          description="Log a side effect to see how severity tracks over time, by medication."
+          description="Log a side effect and it shows up here, so you can see how severity moves over time and which medication it lines up with."
+          className="m-4"
         />
       ) : (
-        <>
-          <div className="h-56 w-full" aria-label="Side-effect severity scatter chart">
+        <div className="px-4 py-4">
+          <div className="tnum h-56 w-full" aria-label="Side-effect severity over time, scatter chart">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 8, right: 8, bottom: 4, left: -16 }}>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
+                <CartesianGrid stroke={GRID} strokeDasharray="2 4" />
                 <XAxis
                   type="number"
                   dataKey="t"
                   domain={domain}
                   scale="time"
-                  tick={{ fill: "#94a3b8", fontSize: 10 }}
+                  tick={{ fill: AXIS, fontSize: 10 }}
                   tickLine={false}
-                  axisLine={{ stroke: "#1e293b" }}
+                  axisLine={{ stroke: GRID }}
                   tickFormatter={(v) => format(new Date(v), "MMM d")}
                   minTickGap={32}
                 />
@@ -109,14 +117,14 @@ export function SideEffectScatter({
                   dataKey="severity"
                   domain={[0, 5]}
                   ticks={[1, 2, 3, 4, 5]}
-                  tick={{ fill: "#94a3b8", fontSize: 10 }}
+                  tick={{ fill: AXIS, fontSize: 10 }}
                   tickLine={false}
                   axisLine={false}
                   width={44}
                   allowDecimals={false}
                 />
                 <ZAxis range={[48, 48]} />
-                <Tooltip content={<ScatterTooltip />} cursor={{ stroke: "#1e293b" }} />
+                <Tooltip content={<ScatterTooltip />} cursor={{ stroke: GRID }} />
                 {series
                   .filter((s) => s.points.length > 0)
                   .map((s) => (
@@ -139,15 +147,21 @@ export function SideEffectScatter({
               </ScatterChart>
             </ResponsiveContainer>
           </div>
-          <MedLegend
-            entries={legendEntries}
-            extra={
-              unattributed.length > 0
-                ? [{ label: "Unattributed", color: UNATTRIBUTED_COLOR }]
-                : undefined
-            }
-          />
-        </>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <MedLegend
+              entries={legendEntries}
+              extra={
+                unattributed.length > 0
+                  ? [{ label: "Not linked to a medication", color: UNATTRIBUTED_COLOR }]
+                  : undefined
+              }
+            />
+            <p className="label-mono text-[11px] text-faint" aria-hidden>
+              severity <span className="tnum text-muted">1</span> mild ·{" "}
+              <span className="tnum text-muted">5</span> severe
+            </p>
+          </div>
+        </div>
       )}
     </Card>
   );

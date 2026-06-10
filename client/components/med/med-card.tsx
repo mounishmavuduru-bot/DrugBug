@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Clock, PauseCircle } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { relativeTo } from "@/lib/format";
 import {
@@ -15,10 +15,11 @@ import {
 } from "@/components/med/med-utils";
 
 /**
- * MedCard (PRD §9.3): name (mono), strength, schedule summary, last-taken,
- * 7-day adherence %. Links to the detail screen.
+ * One ruled row in the formulary index. Reads like a drug-reference entry:
+ * name in label-mono, strength, a one-line schedule summary, and the 7-day
+ * adherence figure pinned to the right. The whole row links to the monograph.
  */
-export function MedCard({ med, doses }: { med: Medication; doses: readonly Dose[] }) {
+export function MedRow({ med, doses }: { med: Medication; doses: readonly Dose[] }) {
   const last = lastTaken(doses, med.medId);
   const adh = adherence7d(doses, med.medId);
   const refill = refillStatus(med);
@@ -26,47 +27,46 @@ export function MedCard({ med, doses }: { med: Medication; doses: readonly Dose[
   return (
     <Link
       href={`/meds/${med.medId.toString()}`}
-      className="surface flex items-center gap-3 rounded-[var(--radius)] border border-border p-4 transition-fast hover:border-primary/40"
-      aria-label={`${med.name} ${med.strength} details`}
+      className="flex items-center gap-4 px-4 py-3.5 transition-colors duration-150 ease-[var(--ease)] hover:bg-brand-tint focus-visible:bg-brand-tint"
+      aria-label={`${med.name} ${med.strength} — open monograph`}
     >
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="mono truncate text-sm font-semibold text-text">{med.name}</span>
-          {med.strength ? <span className="mono text-xs text-muted">{med.strength}</span> : null}
-          {!med.active ? (
-            <Badge variant="neutral">
-              <PauseCircle className="size-3" /> Inactive
-            </Badge>
-          ) : null}
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="label-mono truncate text-[15px] font-medium text-ink">{med.name}</span>
+          {med.strength ? <span className="label-mono text-xs text-muted">{med.strength}</span> : null}
+          {!med.active ? <Badge variant="outline">Inactive</Badge> : null}
           {med.isOtc ? <Badge variant="neutral">OTC</Badge> : null}
           {med.prn ? <Badge variant="neutral">PRN</Badge> : null}
         </div>
 
-        <p className="mt-1 flex items-center gap-1 text-xs text-muted">
-          <Clock className="size-3" />
-          {scheduleSummary(med)}
-        </p>
+        <p className="mt-1 truncate text-xs text-muted">{scheduleSummary(med)}</p>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
-          <span>Last taken: {last ? relativeTo(last) : "never"}</span>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-faint">
+          <span>Last taken {last ? relativeTo(last) : "never"}</span>
           {refill.low && refill.daysLeft !== null ? (
-            <span className="text-warning">
-              Refill: {refill.daysLeft === 0 ? "out of doses" : `~${refill.daysLeft}d left`}
+            <span className="text-caution">
+              {refill.daysLeft === 0 ? "Out of doses" : `About ${refill.daysLeft} days of supply left`}
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
-        {adh ? (
-          <div className="text-right">
-            <Badge variant={adherenceVariant(adh.pct)}>{adh.pct}%</Badge>
-            <p className="mt-1 text-[10px] text-muted">7-day adherence</p>
-          </div>
-        ) : (
-          <span className="text-[10px] text-muted">No 7-day data</span>
-        )}
-        <ChevronRight className="size-4 text-muted" />
+      <div className="flex shrink-0 items-center gap-3">
+        <div className="text-right">
+          {adh ? (
+            <>
+              <Badge variant={adherenceVariant(adh.pct)}>
+                <span className="tnum">{adh.pct}%</span>
+              </Badge>
+              <p className="mt-1 label-mono text-[10px] tnum text-faint">
+                {adh.taken}/{adh.scheduled} on time
+              </p>
+            </>
+          ) : (
+            <span className="label-mono text-[10px] uppercase tracking-[0.1em] text-faint">No data</span>
+          )}
+        </div>
+        <ChevronRight className="size-4 text-faint" strokeWidth={1.75} aria-hidden />
       </div>
     </Link>
   );

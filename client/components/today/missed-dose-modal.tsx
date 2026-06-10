@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, AlertTriangle, Flag, CircleSlash, Check } from "lucide-react";
+import { Phone, Flag, CircleSlash, Check } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { recoveryGuidance } from "@/lib/missed-dose";
@@ -35,24 +35,24 @@ export function MissedDoseModal({
   const callHref = phone ? `tel:${phone}` : "tel:";
 
   return (
-    <Modal open={open} onClose={onClose} title="Missed-dose recovery">
-      <div className="space-y-4">
-        <div>
+    <Modal open={open} onClose={onClose} title="Before you skip this dose">
+      <div className="space-y-5">
+        <div className="border-b border-rule pb-4">
           {med ? (
-            <p className="mono text-sm text-text">
+            <p className="label-mono text-sm text-ink">
               {med.name}
               {med.strength ? (
                 <span className="text-muted"> · {med.strength}</span>
               ) : null}
             </p>
           ) : null}
-          <p className="mt-0.5 text-sm font-medium text-text">{guidance.title}</p>
+          <p className="mt-1 text-sm font-medium text-ink">{guidance.title}</p>
         </div>
 
-        <ol className="space-y-2">
+        <ol className="space-y-2.5">
           {guidance.steps.map((step, i) => (
-            <li key={i} className="flex gap-2.5 text-sm text-text">
-              <span className="mono mt-px grid size-5 shrink-0 place-items-center rounded-full bg-elevated text-[11px] text-muted">
+            <li key={i} className="flex gap-3 text-sm text-ink">
+              <span className="label-mono tnum mt-px grid size-5 shrink-0 place-items-center rounded-[var(--radius-sharp)] border border-rule-strong bg-surface text-[11px] text-muted">
                 {i + 1}
               </span>
               <span className="leading-snug">{step}</span>
@@ -62,45 +62,44 @@ export function MissedDoseModal({
 
         <div className="space-y-2">
           {guidance.neverDouble ? (
-            <div className="flex items-start gap-2 rounded-[var(--radius)] border border-danger/30 bg-danger/10 p-2.5 text-xs text-danger">
-              <CircleSlash className="mt-px size-4 shrink-0" />
-              <span>Never take a double dose to make up for a missed one.</span>
+            <div className="flex items-start gap-2 rounded-[var(--radius-sm)] border border-rule bg-danger-tint p-2.5 text-xs text-danger">
+              <CircleSlash className="mt-px size-4 shrink-0" strokeWidth={1.75} />
+              <span>Do not take a double dose to make up for this one.</span>
             </div>
           ) : null}
           {guidance.flagPrescriber ? (
-            <div className="flex items-start gap-2 rounded-[var(--radius)] border border-warning/30 bg-warning/10 p-2.5 text-xs text-warning">
-              <Flag className="mt-px size-4 shrink-0" />
-              <span>Log this for your prescriber to review.</span>
+            <div className="flex items-start gap-2 rounded-[var(--radius-sm)] border border-rule bg-monitor-tint p-2.5 text-xs text-monitor">
+              <Flag className="mt-px size-4 shrink-0" strokeWidth={1.75} />
+              <span>Note this for your prescriber to review.</span>
             </div>
           ) : null}
         </div>
 
-        <div className="rounded-[var(--radius)] border border-border bg-elevated/40 p-2.5">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-text">
-            <AlertTriangle className="size-3.5 text-primary" />
-            If unsure, call your pharmacist.
-          </div>
+        <div className="border-t border-rule pt-4">
+          <p className="text-xs text-muted">
+            Not sure what to do? Your pharmacist can answer in a minute.
+          </p>
           <a href={callHref} className="mt-2 block">
             <Button variant="secondary" size="sm" className="w-full">
-              <Phone className="size-4" />
-              Call pharmacist{phone ? "" : " (find number)"}
+              <Phone className="size-4" strokeWidth={1.75} />
+              Call pharmacist{phone ? "" : " (add a number first)"}
             </Button>
           </a>
         </div>
 
         <DecisionSupportNote />
 
-        <div className="flex gap-2 pt-1">
-          <Button variant="ghost" size="md" className="flex-1" onClick={onClose}>
-            Back
+        <div className="flex gap-2 border-t border-rule pt-4">
+          <Button variant="quiet" size="md" className="flex-1" onClick={onClose}>
+            Keep this dose
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             size="md"
             className="flex-1"
             onClick={onSkipConfirmed}
           >
-            <Check className="size-4" />
+            <Check className="size-4" strokeWidth={1.75} />
             Confirm skip
           </Button>
         </div>

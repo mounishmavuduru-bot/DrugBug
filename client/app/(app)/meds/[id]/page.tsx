@@ -1,24 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AlertTriangle,
   ArrowLeft,
-  CalendarClock,
-  ClipboardList,
-  Dna,
   Loader2,
-  Network,
   PauseCircle,
   Pencil,
   Pill,
   PlusCircle,
   RefreshCw,
-  ScanLine,
   ShieldCheck,
-  Stethoscope,
 } from "lucide-react";
 import { useReducer } from "spacetimedb/react";
 
@@ -35,7 +29,7 @@ import {
 import { tsToDate, clockTime, dayLabel, relativeTo } from "@/lib/format";
 import { getPgxFlags, type PgxFlag, type PairFinding, type CascadeFinding } from "@/lib/inference-client";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LoadingState, EmptyState, ErrorState } from "@/components/shared/states";
 import { SeverityBadge } from "@/components/shared/severity";
@@ -47,17 +41,22 @@ import {
   scheduleSummary,
   lastTaken,
   adherence7d,
-  adherenceVariant,
   refillStatus,
   WEEKDAYS,
   type Medication,
 } from "@/components/med/med-utils";
 import { cn } from "@/lib/utils";
 
-const authVariant: Record<string, "success" | "warning" | "danger" | "neutral"> = {
-  verified: "success",
-  inconclusive: "warning",
+const authVariant: Record<string, "positive" | "caution" | "danger" | "neutral"> = {
+  verified: "positive",
+  inconclusive: "caution",
   suspect: "danger",
+};
+
+const authLabel: Record<string, string> = {
+  verified: "Verified",
+  inconclusive: "Inconclusive",
+  suspect: "Suspect",
 };
 
 export default function MedDetailPage() {
@@ -115,20 +114,20 @@ export default function MedDetailPage() {
 
   // ---- loading / not-found ----
   if (medId === null) {
-    return <ErrorState title="Invalid medication" description="That medication link is malformed." />;
+    return <ErrorState title="That link looks wrong" description="The medication id in the address isn't valid." />;
   }
   if (!medsReady) {
-    return <LoadingState label="Loading medication…" />;
+    return <LoadingState label="Loading this medication" />;
   }
   if (!med) {
     return (
       <EmptyState
         icon={Pill}
         title="Medication not found"
-        description="It may have been removed."
+        description="It may have been removed from your list."
         action={
-          <Link href="/meds" className={buttonVariants({ variant: "secondary" })}>
-            Back to medications
+          <Link href="/meds" className={buttonVariants({ variant: "secondary", size: "sm" })}>
+            Back to the list
           </Link>
         }
       />
@@ -181,179 +180,183 @@ export default function MedDetailPage() {
       await deactivateMedication({ medId: med.medId });
       router.push("/meds");
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "Failed to deactivate.");
+      setActionError(e instanceof Error ? e.message : "Couldn't deactivate this. Try again.");
       setDeactivating(false);
     }
   };
 
   return (
-    <div className="space-y-5 pb-4">
-      <header className="flex items-start gap-3">
+    <div className="space-y-6 pb-4">
+      <div>
         <Link
           href="/meds"
-          className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
-          aria-label="Back to medications"
+          className="label-mono inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted transition-colors duration-150 ease-[var(--ease)] hover:text-ink"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft className="size-3.5" strokeWidth={1.75} aria-hidden /> Formulary
         </Link>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="mono truncate text-xl font-semibold tracking-tight">{med.name}</h1>
-            {med.strength ? <span className="mono text-sm text-muted">{med.strength}</span> : null}
-            {!med.active ? (
-              <Badge variant="neutral">
-                <PauseCircle className="size-3" /> Inactive
-              </Badge>
-            ) : null}
-            {med.isOtc ? <Badge variant="neutral">OTC</Badge> : <Badge variant="primary">Rx</Badge>}
-            {med.prn ? <Badge variant="neutral">PRN</Badge> : null}
-          </div>
-          {med.genericName ? (
-            <p className="mt-0.5 text-xs text-muted">
-              Generic: <span className="mono">{med.genericName}</span>
-              {med.rxnormCode ? <span className="ml-2">RxCUI {med.rxnormCode}</span> : null}
-            </p>
-          ) : null}
+      </div>
+
+      {/* Monograph masthead — the drug name is the one dominant element. */}
+      <header className="border-b border-rule-strong pb-5">
+        <p className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">
+          {med.isOtc ? "Over the counter" : "Prescription"}
+          {med.prn ? " · as needed" : ""}
+          {!med.active ? " · inactive" : ""}
+        </p>
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h1 className="label-mono min-w-0 break-words text-3xl font-medium leading-tight text-ink">
+            {med.name}
+          </h1>
+          {med.strength ? <span className="label-mono text-lg text-muted">{med.strength}</span> : null}
         </div>
+        {med.genericName || med.rxnormCode ? (
+          <p className="mt-2 text-xs text-muted">
+            {med.genericName ? (
+              <>
+                Generic <span className="label-mono text-ink">{med.genericName}</span>
+              </>
+            ) : null}
+            {med.rxnormCode ? (
+              <span className="ml-2 label-mono text-faint">RxCUI {med.rxnormCode}</span>
+            ) : null}
+          </p>
+        ) : null}
       </header>
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
-          <Pencil className="size-3" /> Edit
+          <Pencil aria-hidden /> Edit
         </Button>
         <Button variant="secondary" size="sm" onClick={() => setLogOpen(true)}>
-          <PlusCircle className="size-3" /> Log side effect
+          <PlusCircle aria-hidden /> Log side effect
         </Button>
         {med.active ? (
           <Button variant="danger" size="sm" onClick={handleDeactivate} disabled={deactivating}>
-            {deactivating ? <Loader2 className="size-3 animate-spin" /> : <PauseCircle className="size-3" />}
+            {deactivating ? <Loader2 className="animate-spin" /> : <PauseCircle aria-hidden />}
             Deactivate
           </Button>
         ) : null}
       </div>
-      {actionError ? <p className="text-xs text-danger">{actionError}</p> : null}
+      {actionError ? <p className="text-xs text-danger" role="alert">{actionError}</p> : null}
 
       {/* Recall alerts (PRD §10.7) */}
       {medRecalls.length > 0 ? (
-        <Card className="border-danger/40">
-          {medRecalls.map((r) => (
-            <div key={r.alertId.toString()} className="flex items-start gap-2 text-sm">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-danger" />
-              <div>
-                <p className="font-medium text-danger">Recall — {r.severity}</p>
-                <p className="text-xs text-muted">{r.summary}</p>
+        <Card className="border-danger bg-danger-tint">
+          <CardContent className="space-y-2">
+            {medRecalls.map((r) => (
+              <div key={r.alertId.toString()} className="flex items-start gap-2 text-sm">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-danger" strokeWidth={1.75} />
+                <div>
+                  <p className="font-medium text-danger">Recall — {r.severity}</p>
+                  <p className="text-xs text-muted">{r.summary}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </CardContent>
         </Card>
       ) : null}
 
-      {/* Adherence + last taken */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card>
-          <CardContent className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted">7-day adherence</p>
-              {adh ? (
-                <p className="mt-1 text-lg font-semibold">
-                  <span className="mono">{adh.pct}%</span>
-                </p>
-              ) : (
-                <p className="mt-1 text-sm text-muted">No data</p>
-              )}
+      {/* At a glance — adherence is the one figure; last-taken sits beside it,
+          divided by a rule rather than boxed into a second stat card. */}
+      <div className="flex items-stretch gap-5 border-t border-rule pt-4">
+        <div className="min-w-0 flex-1">
+          <p className="label-mono text-[11px] uppercase tracking-[0.12em] text-faint">
+            On time, last 7 days
+          </p>
+          {adh ? (
+            <div className="mt-1 flex items-baseline gap-2.5">
+              <span className="font-display text-3xl leading-none text-ink tnum">{adh.pct}%</span>
+              <span className="label-mono text-xs text-muted tnum">
+                {adh.taken}/{adh.scheduled} doses
+              </span>
             </div>
-            {adh ? (
-              <Badge variant={adherenceVariant(adh.pct)}>
-                {adh.taken}/{adh.scheduled}
-              </Badge>
-            ) : null}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <p className="text-xs text-muted">Last taken</p>
-            <p className="mt-1 text-sm text-text">{last ? relativeTo(last) : "Never"}</p>
-            {last ? <p className="text-[11px] text-muted">{clockTime(last)}</p> : null}
-          </CardContent>
-        </Card>
+          ) : (
+            <p className="mt-1.5 text-sm text-muted">No scheduled doses to measure yet.</p>
+          )}
+        </div>
+        <div className="w-px shrink-0 bg-rule" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <p className="label-mono text-[11px] uppercase tracking-[0.12em] text-faint">Last taken</p>
+          <p className="mt-1.5 text-sm text-ink">{last ? relativeTo(last) : "Never"}</p>
+          {last ? <p className="label-mono text-[11px] text-faint tnum">{clockTime(last)}</p> : null}
+        </div>
       </div>
 
       {/* Schedule */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarClock className="size-4 text-primary" /> Schedule
-          </CardTitle>
-          <Badge variant="neutral">{scheduleSummary(med)}</Badge>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {med.prn ? (
-            <p className="text-sm text-muted">As needed — no fixed dose times.</p>
-          ) : med.scheduleTimes.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {med.scheduleTimes.map((t) => (
-                <span key={t} className="mono rounded-full border border-border bg-elevated px-2.5 py-1 text-xs text-text">
-                  {t}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-warning">No dose times set.</p>
-          )}
-          <p className="text-xs text-muted">Days: {scheduledDays}</p>
-        </CardContent>
-      </Card>
+      <Section
+        label="Schedule"
+        aside={<Badge variant="neutral">{scheduleSummary(med)}</Badge>}
+      >
+        {med.prn ? (
+          <p className="text-sm text-muted">Taken only when needed — no fixed dose times.</p>
+        ) : med.scheduleTimes.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {med.scheduleTimes.map((t) => (
+              <span
+                key={t}
+                className="label-mono tnum rounded-[var(--radius-pill)] border border-rule-strong bg-surface px-2.5 py-1 text-xs text-ink"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-caution">No dose times set yet.</p>
+        )}
+        <p className="mt-2.5 text-xs text-muted">
+          Days <span className="text-ink">{scheduledDays}</span>
+        </p>
+      </Section>
 
-      {/* Prescriber / pharmacy / refill */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Stethoscope className="size-4 text-primary" /> Prescription
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-y-3 text-sm">
+      {/* Prescriber / pharmacy / refill — a ruled Rx field list. */}
+      <Section label="Prescription">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
           <Field label="Prescriber" value={med.prescriber} />
           <Field label="Pharmacy" value={med.pharmacy} />
           <Field label="NDC" value={med.ndc} mono />
           <Field label="Doses remaining" value={String(med.dosesRemaining)} mono />
-          <div className="col-span-2 flex items-center justify-between border-t border-border pt-3">
-            <div className="flex items-center gap-2 text-xs text-muted">
-              <RefreshCw className="size-3.5" />
-              Refill {refillOn ? `on ${dayLabel(refillOn)}` : "date not set"}
-            </div>
-            {refill.daysLeft !== null ? (
-              <Badge variant={refill.low ? "warning" : "neutral"}>
-                {refill.daysLeft === 0 ? "Out of doses" : `~${refill.daysLeft}d of supply`}
-              </Badge>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+        </dl>
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-rule pt-3">
+          <span className="inline-flex items-center gap-2 text-xs text-muted">
+            <RefreshCw className="size-3.5" strokeWidth={1.75} aria-hidden />
+            Refill {refillOn ? `on ${dayLabel(refillOn)}` : "date not set"}
+          </span>
+          {refill.daysLeft !== null ? (
+            <Badge variant={refill.low ? "caution" : "neutral"}>
+              {refill.daysLeft === 0 ? "Out of doses" : `About ${refill.daysLeft} days of supply`}
+            </Badge>
+          ) : null}
+        </div>
+      </Section>
 
       {/* Interactions (PRD §9.3 → links to CascadeMap) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Network className="size-4 text-primary" /> Interactions
-          </CardTitle>
-          <Link href="/cascade" className="text-xs text-primary underline-offset-2 hover:underline">
-            Open CascadeMap
+      <Section
+        label="Interactions"
+        aside={
+          <Link
+            href="/cascade"
+            className="text-xs font-medium text-brand underline decoration-rule-strong underline-offset-4 transition-colors duration-150 ease-[var(--ease)] hover:decoration-brand"
+          >
+            Open the interaction map
           </Link>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        }
+      >
+        <div className="space-y-3">
           {myPairs.length === 0 && myCascades.length === 0 ? (
             <p className="text-sm text-muted">
-              No interactions flagged for this medication{cache ? "" : " yet"}.
+              {cache
+                ? "Nothing flagged for this medication against your current list."
+                : "We haven't run an interaction check yet for this medication."}
             </p>
           ) : (
             <>
               {myPairs.map((p, i) => (
-                <div key={`p-${i}`} className="rounded-[var(--radius)] border border-border p-3">
+                <div key={`p-${i}`} className="rounded-[var(--radius-sm)] border border-rule bg-surface p-3">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <span className="mono text-xs text-text">{p.drugA}</span>
-                    <span className="text-muted">+</span>
-                    <span className="mono text-xs text-text">{p.drugB}</span>
+                    <span className="label-mono text-xs text-ink">{p.drugA}</span>
+                    <span className="text-faint">+</span>
+                    <span className="label-mono text-xs text-ink">{p.drugB}</span>
                     <SeverityBadge severity={p.severity} />
                     <SourceTag source={p.source} />
                   </div>
@@ -364,115 +367,109 @@ export default function MedDetailPage() {
                 </div>
               ))}
               {myCascades.map((c, i) => (
-                <div key={`c-${i}`} className="rounded-[var(--radius)] border border-danger/30 p-3">
+                <div key={`c-${i}`} className="rounded-[var(--radius-sm)] border border-danger bg-danger-tint p-3">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-medium text-text">Cascade ({c.drugs.length} drugs)</span>
+                    <span className="text-xs font-medium text-ink">Cascade across {c.drugs.length} drugs</span>
                     <SourceTag source={c.source === "mechanistic" ? "kb" : "model"} />
                   </div>
-                  <p className="mono text-xs text-muted">{c.drugs.join(" + ")}</p>
+                  <p className="label-mono text-xs text-muted">{c.drugs.join(" + ")}</p>
                   <ConfidenceBar value={c.risk} label="Cascade risk" className="mt-2" />
                 </div>
               ))}
             </>
           )}
           <Disclaimer />
-        </CardContent>
-      </Card>
+        </div>
+      </Section>
 
       {/* Pharmacogenomic flag (PRD §10.4) */}
       {matchedPgx.length > 0 ? (
-        <Card className="border-primary/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Dna className="size-4 text-primary" /> Pharmacogenomic flag
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <Section label="Pharmacogenomic flag">
+          <div className="space-y-2">
             {matchedPgx.map((f, i) => (
-              <div key={i} className="rounded-[var(--radius)] border border-border p-3">
+              <div key={i} className="rounded-[var(--radius-sm)] border border-rule bg-surface p-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="primary">{f.gene}</Badge>
-                  <span className="text-xs text-text">{f.phenotype}</span>
+                  <Badge variant="brand">{f.gene}</Badge>
+                  <span className="text-xs text-ink">{f.phenotype}</span>
                   {f.cpicLevel ? <Badge variant="neutral">CPIC {f.cpicLevel}</Badge> : null}
                 </div>
-                <p className="mt-1 text-xs text-text">{f.guidance}</p>
+                <p className="mt-1 text-xs text-ink">{f.guidance}</p>
               </div>
             ))}
             {pgxCaveat ? <p className="text-[11px] text-muted">{pgxCaveat}</p> : null}
             <Disclaimer />
-          </CardContent>
-        </Card>
+          </div>
+        </Section>
       ) : null}
 
       {/* Last scan + authenticity (PRD §10.1) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ScanLine className="size-4 text-primary" /> Last scan
-          </CardTitle>
-          <Link href="/scan?intent=add" className="text-xs text-primary underline-offset-2 hover:underline">
+      <Section
+        label="Last scan"
+        aside={
+          <Link
+            href="/scan?intent=add"
+            className="text-xs font-medium text-brand underline decoration-rule-strong underline-offset-4 transition-colors duration-150 ease-[var(--ease)] hover:decoration-brand"
+          >
             New scan
           </Link>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {medScan ? (
-            <>
-              <div className="flex flex-wrap items-center gap-2">
-                <ShieldCheck className="size-4 text-muted" />
-                <Badge variant={authVariant[medScan.authenticity] ?? "neutral"}>
-                  {medScan.authenticity || "unknown"}
-                </Badge>
-                <span className="text-xs text-muted">{relativeTo(tsToDate(medScan.createdAt))}</span>
-              </div>
-              {medScan.identifiedDrug ? (
-                <p className="text-xs text-muted">
-                  Identified: <span className="mono text-text">{medScan.identifiedDrug}</span>
-                </p>
-              ) : null}
-              {typeof medScan.idConfidence === "number" && medScan.idConfidence > 0 ? (
-                <ConfidenceBar value={medScan.idConfidence} label="ID confidence" className="mt-1" />
-              ) : null}
-              <Disclaimer />
-            </>
-          ) : (
-            <p className="text-sm text-muted">No scan linked to this medication yet.</p>
-          )}
-        </CardContent>
-      </Card>
+        }
+      >
+        {medScan ? (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <ShieldCheck className="size-4 text-muted" strokeWidth={1.75} aria-hidden />
+              <Badge variant={authVariant[medScan.authenticity] ?? "neutral"}>
+                {authLabel[medScan.authenticity] ?? medScan.authenticity ?? "Unknown"}
+              </Badge>
+              <span className="text-xs text-muted">{relativeTo(tsToDate(medScan.createdAt))}</span>
+            </div>
+            {medScan.identifiedDrug ? (
+              <p className="text-xs text-muted">
+                Identified as <span className="label-mono text-ink">{medScan.identifiedDrug}</span>
+              </p>
+            ) : null}
+            {typeof medScan.idConfidence === "number" && medScan.idConfidence > 0 ? (
+              <ConfidenceBar value={medScan.idConfidence} label="ID confidence" className="mt-1" />
+            ) : null}
+            <Disclaimer />
+          </div>
+        ) : (
+          <p className="text-sm text-muted">No scan is linked to this medication yet.</p>
+        )}
+      </Section>
 
       {/* Side effects for this med (PRD §9.3 / §10.3) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="size-4 text-primary" /> Side effects
-          </CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => setLogOpen(true)}>
-            <PlusCircle className="size-3" /> Log
+      <Section
+        label="Side effects"
+        aside={
+          <Button variant="quiet" size="sm" onClick={() => setLogOpen(true)}>
+            <PlusCircle aria-hidden /> Log
           </Button>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {medSideEffects.length === 0 ? (
-            <p className="text-sm text-muted">None logged for this medication.</p>
-          ) : (
-            medSideEffects.map((e) => (
-              <div
+        }
+      >
+        {medSideEffects.length === 0 ? (
+          <p className="text-sm text-muted">Nothing logged for this medication.</p>
+        ) : (
+          <ul className="border-t border-rule">
+            {medSideEffects.map((e) => (
+              <li
                 key={e.effectId.toString()}
-                className="flex items-start justify-between gap-3 rounded-[var(--radius)] border border-border p-3"
+                className="flex items-start justify-between gap-3 border-b border-rule py-3"
               >
                 <div className="min-w-0">
-                  <p className="text-sm text-text">{e.symptom}</p>
-                  <p className="text-[11px] text-muted">{relativeTo(tsToDate(e.loggedAt))}</p>
+                  <p className="text-sm text-ink">{e.symptom}</p>
+                  <p className="label-mono text-[11px] text-faint">{relativeTo(tsToDate(e.loggedAt))}</p>
                 </div>
-                <Badge variant={e.severity >= 4 ? "danger" : e.severity >= 3 ? "warning" : "neutral"}>
+                <Badge variant={e.severity >= 4 ? "danger" : e.severity >= 3 ? "caution" : "neutral"}>
                   Severity {e.severity}
                 </Badge>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
 
-      {!dosesReady ? <p className="text-center text-[11px] text-muted">Syncing dose history…</p> : null}
+      {!dosesReady ? <p className="text-center text-[11px] text-faint">Syncing dose history</p> : null}
 
       {me ? (
         <>
@@ -490,11 +487,36 @@ export default function MedDetailPage() {
   );
 }
 
+/**
+ * A monograph section: a ruled reference-label heading with an optional aside
+ * (a status chip or a link), then the section body. Replaces the stack of
+ * identical icon-headed cards so the page reads like a printed entry, not a deck.
+ */
+function Section({
+  label,
+  aside,
+  children,
+}: {
+  label: string;
+  aside?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="border-t border-rule pt-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="label-mono text-[11px] uppercase tracking-[0.16em] text-faint">{label}</h2>
+        {aside ?? null}
+      </div>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <p className="text-xs text-muted">{label}</p>
-      <p className={cn("text-sm text-text", mono && "mono")}>{value || "—"}</p>
+      <dt className="label-mono text-[11px] uppercase tracking-[0.12em] text-faint">{label}</dt>
+      <dd className={cn("mt-0.5 text-sm text-ink", mono && "label-mono")}>{value || "—"}</dd>
     </div>
   );
 }

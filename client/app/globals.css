@@ -1,66 +1,117 @@
 @import "tailwindcss";
 
-/* DrugBug design system — PRD §17. Medical-grade trust, Linear-app polish.
-   Dark, dense, no cute health-app styling. */
+/* ============================================================================
+   DrugBug — "Monograph" design system.
+   A clinical drug-reference aesthetic: warm paper, ink type, hairline rules,
+   prescription-label monospace for drug data. Not a dark cyan-glow health app.
+   Light, editorial, document-like, trustworthy. See docs/MONOGRAPH_DESIGN.md.
+   ============================================================================ */
 
 @theme {
-  /* Palette (PRD §17) */
-  --color-background: #0a0e1a;
-  --color-surface: #0f1729;
-  --color-elevated: #1a2236;
-  --color-primary: #06b6d4;
-  --color-primary-foreground: #04222a;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-text: #f1f5f9;
-  --color-muted: #94a3b8;
-  --color-border: #1e293b;
+  /* ---- palette: warm paper + ink, one dominant green, sharp clinical signals ---- */
+  --color-paper: #f4efe4;        /* page — warm off-white, easy at dose times */
+  --color-surface: #fbf8f0;      /* raised panels */
+  --color-card: #ffffff;         /* highest surface (data sheets) */
+  --color-ink: #18130d;          /* near-black warm — body + headings */
+  --color-muted: #6a6052;        /* secondary text (AA on paper) */
+  --color-faint: #938975;        /* least-important / placeholders */
+  --color-rule: #e0d7c4;         /* hairline rules + borders */
+  --color-rule-strong: #cabfa6;  /* emphasized rules */
 
-  /* Severity scale for CascadeMap edges / interaction badges */
-  --color-sev-monitor: #f59e0b; /* yellow  — monitor */
-  --color-sev-caution: #f97316; /* orange  — caution */
-  --color-sev-contra: #ef4444;  /* red     — contraindicated */
+  /* dominant brand — deep pharmacy green */
+  --color-brand: #15402e;
+  --color-brand-hover: #0f3122;
+  --color-brand-ink: #f4efe4;    /* text on brand */
+  --color-brand-tint: #e6ece3;   /* faint brand wash */
 
-  /* Type (PRD §17): Inter display/body, JetBrains Mono for drug names + doses */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  /* clinical signal colors — earthy, paper-appropriate, NOT neon. Reserved for meaning. */
+  --color-danger: #a32a1a;       /* contraindicated / destructive */
+  --color-danger-tint: #f3e2dd;
+  --color-caution: #b5521e;      /* caution */
+  --color-monitor: #936410;      /* monitor / warning */
+  --color-monitor-tint: #f1e7d2;
+  --color-positive: #2f6d4f;     /* taken / verified */
+  --color-positive-tint: #e2ece5;
 
-  --radius: 0.625rem;
+  /* ---- type: editorial serif display + clinical sans body + label mono ---- */
+  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
+
+  /* ---- radii: varied by role (no uniform 16px) ---- */
+  --radius-sharp: 0px;   /* data sheets, rules, table cells */
+  --radius-sm: 3px;      /* inputs, buttons */
+  --radius-md: 6px;      /* panels, cards */
+  --radius-pill: 999px;  /* status chips — a pill, on-brand here */
+
+  /* ---- motion: subtle, fast, standard ease; transform/opacity only ---- */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
   html {
-    color-scheme: dark;
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
   }
   body {
-    background-color: var(--color-background);
-    color: var(--color-text);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv05";
     -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.011em;
+    text-rendering: optimizeLegibility;
   }
-  h1, h2, h3, h4 {
-    font-weight: 600;
-    letter-spacing: -0.02em; /* PRD §17 display tracking */
+  /* Headings: editorial serif, tight, real scale contrast vs body */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    color: var(--color-ink);
   }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.9rem); }
+  h2 { font-size: clamp(1.4rem, 3.5vw, 1.85rem); }
+  h3 { font-size: 1.15rem; font-weight: 600; }
+  /* Section eyebrow: a monograph reference label, NOT an all-caps marketing kicker on every section */
+  ::selection { background: var(--color-brand); color: var(--color-brand-ink); }
+
+  a { color: inherit; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
   }
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
+  /* quiet, on-paper scrollbars */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--color-rule-strong); border-radius: 999px; border: 3px solid var(--color-paper); }
   ::-webkit-scrollbar-track { background: transparent; }
+
+  /* visible, on-brand focus ring everywhere (keyboard accessibility) */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 }
 
 @layer utilities {
-  .transition-fast { transition: all 150ms ease-out; }
-  .mono { font-family: var(--font-mono); }
-  .surface { background-color: var(--color-surface); }
-  .elevated { background-color: var(--color-elevated); }
+  /* prescription-label monospace for drug names, doses, NDC, codes */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-feature-settings: "zero", "ss01";
+    letter-spacing: -0.01em;
+  }
+  /* a true hairline rule, like a printed monograph */
+  .rule { border-color: var(--color-rule); }
+  /* tabular figures for aligned numbers in tables/stats */
+  .tnum { font-variant-numeric: tabular-nums; }
+  /* staggered page-load reveal (used once, on Today) */
+  @keyframes monograph-rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  .rise { animation: monograph-rise 0.4s var(--ease) both; }
 }

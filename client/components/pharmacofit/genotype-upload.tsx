@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { Upload, FileUp, Loader2, AlertTriangle, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 const ACCEPT = ".txt,.zip,text/plain,application/zip";
 const MAX_BYTES = 100 * 1024 * 1024; // 100 MB — raw 23andMe/Ancestry exports are well under this.
@@ -21,11 +20,10 @@ function prettyBytes(n: number): string {
 }
 
 /**
- * Genotype file selection + upload (PRD §10.4 step 1). Accepts a 23andMe /
- * AncestryDNA raw genotype export (.txt or .zip), then hands it to
- * uploadGenotype(); the service converts to VCF, runs PharmCAT, and writes
- * derived phenotypes back to the profile. The parent shows the processing
- * state once `uploading` flips.
+ * Genotype file selection + upload (step 1). Accepts a 23andMe / AncestryDNA raw
+ * genotype export (.txt or .zip), then hands it to uploadGenotype(); the service
+ * converts to VCF, runs PharmCAT, and writes derived phenotypes back to the
+ * profile. The parent shows the processing state once `uploading` flips.
  */
 export function GenotypeUpload({
   onUpload,
@@ -42,12 +40,12 @@ export function GenotypeUpload({
   function pickFile(f: File | undefined) {
     if (!f) return;
     if (!isAcceptedFile(f)) {
-      setError("Unsupported file. Upload your raw genotype export as a .txt or .zip file.");
+      setError("That file type isn't supported. Upload your raw genotype export as a .txt or .zip file.");
       setFile(null);
       return;
     }
     if (f.size > MAX_BYTES) {
-      setError("That file is too large to be a raw genotype export. Check the file and try again.");
+      setError("That file is larger than a raw genotype export should be. Check the file and try again.");
       setFile(null);
       return;
     }
@@ -71,88 +69,89 @@ export function GenotypeUpload({
 
   return (
     <div className="space-y-3">
-      <Card className="space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold text-text">
+      <section className="rounded-[var(--radius-md)] border border-rule bg-card">
+        <div className="border-b border-rule px-4 py-3.5">
+          <h2 className="font-display text-lg text-ink">
             Upload your raw genotype file
           </h2>
-          <p className="mt-1 text-xs leading-snug text-muted">
+          <p className="mt-1 text-sm leading-relaxed text-muted">
             Export the raw data from 23andMe or AncestryDNA and upload the file
-            here. We convert it to VCF and run PharmCAT to derive your CPIC
-            phenotypes. We never upload data you don’t choose.
+            here. We convert it to a VCF and run PharmCAT to call your CPIC
+            phenotypes. Nothing is uploaded until you choose a file and submit.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            pickFile(e.dataTransfer.files?.[0]);
-          }}
-          disabled={uploading}
-          aria-label="Choose a genotype file to upload"
-          className={[
-            "flex w-full flex-col items-center justify-center gap-2 rounded-[var(--radius)] border border-dashed px-4 py-8 text-center transition-fast outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50",
-            dragging
-              ? "border-primary/60 bg-primary/5"
-              : "border-border bg-elevated/40 hover:border-primary/40 hover:bg-elevated",
-          ].join(" ")}
-        >
-          <div className="grid size-10 place-items-center rounded-full bg-elevated text-muted">
-            <FileUp className="size-5" />
-          </div>
-          <p className="text-sm font-medium text-text">
-            {file ? "Choose a different file" : "Tap to choose a file"}
-          </p>
-          <p className="text-[11px] text-muted">
-            23andMe / AncestryDNA raw data · .txt or .zip
-          </p>
-          <input
-            ref={inputRef}
-            type="file"
-            accept={ACCEPT}
-            className="sr-only"
+        <div className="px-4 py-4 space-y-3">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              pickFile(e.dataTransfer.files?.[0]);
+            }}
             disabled={uploading}
-            onChange={(e) => pickFile(e.target.files?.[0])}
-          />
-        </button>
+            aria-label="Choose a genotype file to upload"
+            className={[
+              "flex w-full flex-col items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-dashed px-4 py-8 text-center transition-colors duration-150 ease-[var(--ease)] disabled:opacity-50",
+              dragging
+                ? "border-brand bg-brand-tint"
+                : "border-rule-strong bg-surface hover:border-brand hover:bg-brand-tint",
+            ].join(" ")}
+          >
+            <FileUp className="size-6 text-faint" strokeWidth={1.75} aria-hidden />
+            <p className="text-sm font-medium text-ink">
+              {file ? "Choose a different file" : "Choose a file or drop it here"}
+            </p>
+            <p className="label-mono text-[11px] text-muted">
+              23andMe / AncestryDNA raw data · .txt or .zip
+            </p>
+            <input
+              ref={inputRef}
+              type="file"
+              accept={ACCEPT}
+              className="sr-only"
+              disabled={uploading}
+              onChange={(e) => pickFile(e.target.files?.[0])}
+            />
+          </button>
 
-        {file ? (
-          <div className="flex items-center justify-between gap-3 rounded-[var(--radius)] border border-border bg-elevated px-3 py-2">
-            <div className="min-w-0">
-              <p className="mono truncate text-xs text-text">{file.name}</p>
-              <p className="text-[11px] text-muted">{prettyBytes(file.size)}</p>
+          {file ? (
+            <div className="flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-rule bg-surface px-3 py-2">
+              <div className="min-w-0">
+                <p className="label-mono truncate text-xs text-ink">{file.name}</p>
+                <p className="text-[11px] text-muted">{prettyBytes(file.size)}</p>
+              </div>
+              {!uploading ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFile(null);
+                    setError(null);
+                    if (inputRef.current) inputRef.current.value = "";
+                  }}
+                  aria-label="Remove selected file"
+                  className="rounded-[var(--radius-sm)] p-1 text-muted transition-colors duration-150 ease-[var(--ease)] hover:bg-brand-tint hover:text-ink"
+                >
+                  <X className="size-4" />
+                </button>
+              ) : null}
             </div>
-            {!uploading ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setFile(null);
-                  setError(null);
-                  if (inputRef.current) inputRef.current.value = "";
-                }}
-                aria-label="Remove selected file"
-                className="rounded-md p-1 text-muted transition-fast hover:bg-surface hover:text-text"
-              >
-                <X className="size-4" />
-              </button>
-            ) : null}
-          </div>
-        ) : null}
+          ) : null}
 
-        {error ? (
-          <p className="flex items-start gap-1.5 text-xs text-danger">
-            <AlertTriangle className="mt-px size-3.5 shrink-0" /> {error}
-          </p>
-        ) : null}
-      </Card>
+          {error ? (
+            <p className="flex items-start gap-1.5 text-sm text-danger" role="alert">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+              {error}
+            </p>
+          ) : null}
+        </div>
+      </section>
 
       <Button
         variant="primary"
@@ -162,11 +161,11 @@ export function GenotypeUpload({
       >
         {uploading ? (
           <>
-            <Loader2 className="size-4 animate-spin" /> Uploading…
+            <Loader2 className="animate-spin" /> Uploading
           </>
         ) : (
           <>
-            <Upload className="size-4" /> Upload and analyze
+            <Upload /> Upload and analyze
           </>
         )}
       </Button>

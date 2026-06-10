@@ -2,13 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  GitBranch,
-  Network,
-  Plus,
-  RefreshCw,
-  ShieldCheck,
-} from "lucide-react";
+import { GitBranch, Network, Plus, RefreshCw } from "lucide-react";
 
 import { identityHex } from "@/lib/db";
 import { useMyMeds, useInteractions, useMyIdentity, useConnected } from "@/lib/hooks";
@@ -71,84 +65,97 @@ export default function CascadePage() {
   const hasCache = Boolean(cache);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">CascadeMap</h1>
-          <p className="text-xs text-muted">
-            Interaction graph + multi-drug cascade detection.
+          <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+            Interaction map
+          </span>
+          <h1 className="mt-1 text-3xl">Cascade</h1>
+          <p className="mt-1 max-w-md text-sm text-muted">
+            How your medications interact, and which combinations of three or more
+            raise risk that a pair-by-pair check would miss.
           </p>
         </div>
         <Button
           variant="secondary"
+          size="sm"
           onClick={recompute}
           disabled={recomputing || !me || !connected || activeMeds.length === 0}
           className="shrink-0"
-          aria-label="Recompute interactions"
+          aria-label="Recheck interactions across your current medications"
         >
-          <RefreshCw className={cn("size-4", recomputing && "animate-spin")} />
-          {recomputing ? "Recomputing…" : "Recompute"}
+          <RefreshCw className={cn("size-4", recomputing && "animate-spin")} aria-hidden />
+          {recomputing ? "Rechecking" : "Recheck"}
         </Button>
       </header>
 
       {/* Cache provenance: when computed + which model/KB versions (PRD §18 auditability). */}
       {hasCache ? (
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-          <span>Computed {relativeTo(computedAt)}</span>
+        <div className="flex flex-wrap items-center gap-2 border-y border-rule py-2 text-xs text-muted">
+          <span>Last checked {relativeTo(computedAt)}</span>
           {cache?.modelVersion ? (
-            <Badge variant="neutral">model {cache.modelVersion}</Badge>
+            <Badge variant="outline">
+              <span className="label-mono">model {cache.modelVersion}</span>
+            </Badge>
           ) : null}
-          {cache?.kbVersion ? <Badge variant="neutral">KB {cache.kbVersion}</Badge> : null}
+          {cache?.kbVersion ? (
+            <Badge variant="outline">
+              <span className="label-mono">reference {cache.kbVersion}</span>
+            </Badge>
+          ) : null}
         </div>
       ) : null}
 
       {recomputeError ? (
         <ErrorState
-          title="Couldn't recompute"
+          title="Couldn't recheck interactions"
           description={recomputeError}
           retry={recompute}
         />
       ) : null}
 
       {!ready ? (
-        <LoadingState label="Loading interaction graph…" />
+        <LoadingState rows={3} label="Loading your interaction map" />
       ) : activeMeds.length === 0 ? (
         <EmptyState
           icon={Network}
-          title="No active medications"
-          description="Add medications to map their interactions and detect multi-drug cascades."
+          title="No active medications to map"
+          description="Add the medications you take and Cascade will show how they interact and flag risky three-drug combinations."
           action={
             <Link href="/meds/add" className={buttonVariants({ variant: "primary" })}>
-              <Plus className="size-4" /> Add medication
+              <Plus className="size-4" aria-hidden /> Add a medication
             </Link>
           }
         />
       ) : !hasCache ? (
         <EmptyState
           icon={Network}
-          title="No interaction analysis yet"
-          description="Recompute to run the knowledge-base lookup, GNN, and cascade head over your current regimen."
+          title="No interaction check has run yet"
+          description="Recheck to look up your current medications against the reference database and run the model that predicts multi-drug cascades."
           action={
             <Button onClick={recompute} disabled={recomputing || !connected}>
-              <RefreshCw className={cn("size-4", recomputing && "animate-spin")} />
-              {recomputing ? "Recomputing…" : "Recompute now"}
+              <RefreshCw className={cn("size-4", recomputing && "animate-spin")} aria-hidden />
+              {recomputing ? "Rechecking" : "Recheck now"}
             </Button>
           }
         />
       ) : (
         <>
-          {/* Summary counters */}
-          <div className="flex flex-wrap gap-2 text-xs">
-            <Badge variant="neutral">
-              {activeMeds.length} med{activeMeds.length === 1 ? "" : "s"}
-            </Badge>
-            <Badge variant={pairs.length ? "warning" : "neutral"}>
-              {pairs.length} pairwise
-            </Badge>
-            <Badge variant={cascades.length ? "danger" : "neutral"}>
-              {cascades.length} cascade{cascades.length === 1 ? "" : "s"}
-            </Badge>
-          </div>
+          {/* Tally — a clinical count line; the cascade figure carries the weight. */}
+          <dl className="grid grid-cols-3 divide-x divide-rule overflow-hidden rounded-[var(--radius-md)] border border-rule bg-card">
+            <Tally n={activeMeds.length} label="On your list" />
+            <Tally
+              n={pairs.length}
+              label={`Interacting pair${pairs.length === 1 ? "" : "s"}`}
+              tone={pairs.length ? "text-caution" : undefined}
+            />
+            <Tally
+              n={cascades.length}
+              label={`Cascade${cascades.length === 1 ? "" : "s"}`}
+              tone={cascades.length ? "text-danger" : undefined}
+            />
+          </dl>
 
           {/* Graph + side panel: panel stacks below the graph on mobile, beside on lg. */}
           <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
@@ -161,35 +168,38 @@ export default function CascadePage() {
             {selectedPair ? (
               <EdgePanel pair={selectedPair} onClose={() => setSelectedPair(null)} />
             ) : (
-              <Card className="hidden flex-col items-center justify-center gap-2 text-center text-muted lg:flex">
-                <ShieldCheck className="size-5 text-primary" aria-hidden />
-                <p className="text-xs">
-                  Tap an edge to see its mechanism, effect, management, and source.
+              <Card className="hidden flex-col justify-center gap-2 p-4 lg:flex">
+                <p className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+                  Reading the map
+                </p>
+                <p className="text-sm leading-relaxed text-muted">
+                  Each tablet is one of your medications. A line between two means
+                  they interact; its color is the severity. Tap a line to see the
+                  mechanism, effect, and what to do about it.
                 </p>
               </Card>
             )}
           </div>
 
           {pairs.length === 0 ? (
-            <Card>
-              <div className="flex items-center gap-2 text-sm text-text">
-                <ShieldCheck className="size-4 text-success" aria-hidden />
-                No pairwise interactions detected across your active medications.
-              </div>
+            <Card className="px-4 py-3">
+              <p className="text-sm text-ink">
+                No interactions found between any pair of your active medications.
+              </p>
             </Card>
           ) : null}
 
           {/* Cascades section */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <GitBranch className="size-4 text-primary" aria-hidden />
-              <h2 className="text-sm font-semibold">Multi-drug cascades</h2>
+            <div className="flex items-center gap-2 border-b border-rule pb-2">
+              <GitBranch className="size-4 text-brand" strokeWidth={1.75} aria-hidden />
+              <h2 className="text-lg">Three-drug cascades</h2>
             </div>
             {cascades.length === 0 ? (
-              <Card>
+              <Card className="px-4 py-3">
                 <p className="text-sm text-muted">
-                  No 3+ drug cascades detected. Cascades surface combinations that pairwise
-                  checks can miss.
+                  No three-drug cascades found. A cascade is when three or more
+                  medications combine in a way that a single pair check would miss.
                 </p>
               </Card>
             ) : (
@@ -206,6 +216,16 @@ export default function CascadePage() {
         open={Boolean(selectedCascade)}
         onClose={() => setSelectedCascade(null)}
       />
+    </div>
+  );
+}
+
+/** One figure in the cascade tally — a big tabular number over a quiet label. */
+function Tally({ n, label, tone }: { n: number; label: string; tone?: string }) {
+  return (
+    <div className="px-4 py-3">
+      <dd className={cn("font-display tnum text-2xl leading-none", tone ?? "text-ink")}>{n}</dd>
+      <dt className="mt-1.5 text-[11px] leading-tight text-muted">{label}</dt>
     </div>
   );
 }

@@ -85,10 +85,10 @@ export function refillStatus(med: Pick<Medication, "dosesRemaining" | "scheduleT
   return { daysLeft, low: daysLeft !== null && daysLeft < 7 };
 }
 
-/** Variant for an adherence percentage chip. */
-export function adherenceVariant(pct: number): "success" | "warning" | "danger" {
-  if (pct >= 80) return "success";
-  if (pct >= 50) return "warning";
+/** Variant for an adherence percentage chip (Monograph signal palette). */
+export function adherenceVariant(pct: number): "positive" | "monitor" | "danger" {
+  if (pct >= 80) return "positive";
+  if (pct >= 50) return "monitor";
   return "danger";
 }
 

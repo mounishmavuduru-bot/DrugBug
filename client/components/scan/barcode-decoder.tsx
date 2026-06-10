@@ -79,19 +79,19 @@ export function BarcodeDecoder({
 
   if (status === "decoding") {
     return (
-      <Card className="flex items-center gap-2 text-xs text-muted">
-        <Loader2 className="size-4 animate-spin text-primary" />
-        Reading barcode on-device…
+      <Card className="flex items-center gap-2 px-4 py-3 text-xs text-muted">
+        <Loader2 className="size-4 animate-spin text-brand" aria-hidden />
+        Reading the barcode on this device…
       </Card>
     );
   }
 
   if (status === "notfound") {
     return (
-      <Card className="flex items-start gap-2 text-xs text-muted">
-        <ScanLine className="mt-0.5 size-4 shrink-0" />
+      <Card className="flex items-start gap-2 px-4 py-3 text-xs leading-relaxed text-muted">
+        <ScanLine className="mt-0.5 size-4 shrink-0 text-faint" strokeWidth={1.75} aria-hidden />
         <span>
-          No barcode detected on-device. The server will still attempt to read and validate the
+          No barcode read on this device. The server will still try to read and validate the
           label.
         </span>
       </Card>
@@ -102,15 +102,18 @@ export function BarcodeDecoder({
     const { gs1 } = decoded;
     const hasFields = gs1.gtin || gs1.ndc || gs1.lot || gs1.expiry || gs1.serial;
     return (
-      <Card className="space-y-2">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
-          <ScanBarcode className="size-4" /> Decoded on-device
-          <span className="ml-auto rounded bg-elevated px-1.5 py-0.5 text-[10px] font-medium text-muted">
+      <Card className="space-y-2.5 px-4 py-3.5">
+        <div className="flex items-center gap-2 border-b border-rule pb-2">
+          <ScanBarcode className="size-4 text-brand" strokeWidth={1.75} aria-hidden />
+          <span className="label-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+            Read on this device
+          </span>
+          <span className="label-mono ml-auto rounded-[var(--radius-sm)] bg-surface px-1.5 py-0.5 text-[10px] text-muted">
             {decoded.format}
           </span>
         </div>
         {hasFields ? (
-          <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
             <Field label="GTIN" value={gs1.gtin} />
             <Field label="NDC" value={gs1.ndc} />
             <Field label="Lot" value={gs1.lot} />
@@ -118,9 +121,11 @@ export function BarcodeDecoder({
             {gs1.serial ? <Field label="Serial" value={gs1.serial} full /> : null}
           </dl>
         ) : (
-          <p className="break-all font-mono text-[11px] text-muted">{decoded.text}</p>
+          <p className="label-mono break-all text-[11px] text-muted">{decoded.text}</p>
         )}
-        <p className="text-[11px] text-muted">Submitted to the server for GS1 structure validation.</p>
+        <p className="text-[11px] leading-relaxed text-faint">
+          Sent to the server to check the GS1 structure.
+        </p>
       </Card>
     );
   }
@@ -132,8 +137,8 @@ function Field({ label, value, full }: { label: string; value?: string; full?: b
   if (!value) return null;
   return (
     <div className={full ? "col-span-2" : undefined}>
-      <dt className="text-[10px] uppercase tracking-wide text-muted">{label}</dt>
-      <dd className="mono break-all text-text">{value}</dd>
+      <dt className="text-[10px] uppercase tracking-[0.1em] text-faint">{label}</dt>
+      <dd className="label-mono break-all text-ink">{value}</dd>
     </div>
   );
 }

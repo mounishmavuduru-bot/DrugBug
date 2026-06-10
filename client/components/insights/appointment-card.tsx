@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CalendarClock, FileText, RefreshCw, Sparkles } from "lucide-react";
+import { CalendarClock, FileText, FilePlus, RefreshCw } from "lucide-react";
 import { Identity } from "spacetimedb";
 import { useReducer } from "spacetimedb/react";
 import { reducers, identityHex } from "@/lib/db";
@@ -85,47 +85,54 @@ export function AppointmentCard({
 
   return (
     <Card>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-2.5">
-          <div className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-elevated text-primary">
-            <CalendarClock className="size-4" aria-hidden />
+      <div className="px-4 py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-2.5">
+            <div className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-brand-tint text-brand">
+              <CalendarClock className="size-4" aria-hidden />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-ink">
+                {appt.providerName || appt.providerType || "Appointment"}
+              </p>
+              <p className="text-xs text-muted">
+                {appt.providerType && appt.providerName ? `${appt.providerType} · ` : ""}
+                {when ? `${dayLabel(when)} · ${clockTime(when)}` : "No date set"}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-text">
-              {appt.providerName || appt.providerType || "Appointment"}
-            </p>
-            <p className="text-xs text-muted">
-              {appt.providerType && appt.providerName ? `${appt.providerType} · ` : ""}
-              {when ? `${dayLabel(when)} · ${clockTime(when)}` : "Unscheduled"}
-            </p>
-          </div>
+          {hasBrief ? (
+            <Badge variant="positive" className="shrink-0">
+              <FileText className="size-3" aria-hidden /> Brief ready
+            </Badge>
+          ) : null}
         </div>
-        {hasBrief ? (
-          <Badge variant="success" className="shrink-0">
-            <FileText className="size-3" aria-hidden /> Brief ready
-          </Badge>
+
+        <div className="mt-3 flex items-center gap-2 print:hidden">
+          {showGenerating ? (
+            <Button variant="secondary" size="sm" disabled>
+              <RefreshCw className="size-4 animate-spin" /> Generating brief…
+            </Button>
+          ) : (
+            <Button variant={hasBrief ? "secondary" : "primary"} size="sm" onClick={handleGenerate}>
+              <FilePlus className="size-4" />
+              {hasBrief ? "Regenerate brief" : "Generate brief"}
+            </Button>
+          )}
+        </div>
+
+        {error ? (
+          <ErrorState
+            title="Couldn't generate the brief"
+            description={error}
+            retry={handleGenerate}
+            className="mt-3"
+          />
         ) : null}
       </div>
 
-      <div className="mt-3 flex items-center gap-2 print:hidden">
-        {showGenerating ? (
-          <Button variant="secondary" size="sm" disabled>
-            <RefreshCw className="size-4 animate-spin" /> Generating brief…
-          </Button>
-        ) : (
-          <Button variant={hasBrief ? "secondary" : "primary"} size="sm" onClick={handleGenerate}>
-            <Sparkles className="size-4" />
-            {hasBrief ? "Regenerate brief" : "Generate brief"}
-          </Button>
-        )}
-      </div>
-
-      {error ? (
-        <ErrorState title="Brief generation failed" description={error} retry={handleGenerate} />
-      ) : null}
-
       {(hasBrief || briefState.kind === "generating") && !error ? (
-        <div className="mt-4">
+        <div className="border-t border-rule p-4">
           <BriefCard
             briefRef={showGenerating && !hasBrief ? "generating" : appt.briefRef}
             providerLabel={providerLabel}

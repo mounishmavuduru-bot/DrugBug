@@ -43,10 +43,10 @@ function Chip({
       aria-pressed={active}
       aria-label={ariaLabel}
       className={cn(
-        "rounded-full border px-3 py-1 text-xs font-medium transition-fast",
+        "rounded-[var(--radius-pill)] border px-3 py-1 text-xs font-medium transition-colors duration-150 ease-[var(--ease)]",
         active
-          ? "border-primary/40 bg-primary/15 text-primary"
-          : "border-border bg-elevated text-muted hover:text-text"
+          ? "border-brand bg-brand text-brand-ink"
+          : "border-rule-strong bg-card text-muted hover:bg-brand-tint hover:text-ink"
       )}
     >
       {children}
@@ -91,10 +91,10 @@ export function ScheduleBuilder({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Chip active={value.prn} onClick={() => setPrn(!value.prn)} ariaLabel="As needed">
-          As needed (PRN)
+        <Chip active={value.prn} onClick={() => setPrn(!value.prn)} ariaLabel="Taken only when needed">
+          Taken only when needed
         </Chip>
-        <span className="text-[11px] text-muted">No fixed times — taken only when needed.</span>
+        <span className="text-[11px] text-muted">No fixed dose times.</span>
       </div>
 
       {!value.prn ? (
@@ -133,14 +133,14 @@ export function ScheduleBuilder({
                 {value.times.map((t) => (
                   <span
                     key={t}
-                    className="mono inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/15 px-2.5 py-1 text-xs text-primary"
+                    className="label-mono inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-brand bg-brand-tint px-2.5 py-1 text-xs text-brand"
                   >
                     {t}
                     <button
                       type="button"
                       onClick={() => toggleTime(t)}
                       aria-label={`Remove ${t}`}
-                      className="rounded hover:text-text"
+                      className="rounded-[var(--radius-sm)] hover:text-ink"
                     >
                       <X className="size-3" />
                     </button>
@@ -149,11 +149,11 @@ export function ScheduleBuilder({
               </div>
             </div>
           ) : (
-            <p className="text-[11px] text-warning">Add at least one time, or mark this as PRN.</p>
+            <p className="text-[11px] text-caution">Add at least one time, or mark this as taken only when needed.</p>
           )}
 
           <div>
-            <Label>Days (none selected = every day)</Label>
+            <Label>Days — leave empty for every day</Label>
             <div className="flex flex-wrap gap-2">
               {WEEKDAYS.map((d, i) => (
                 <Chip key={d} active={value.days.includes(i)} onClick={() => toggleDay(i)}>

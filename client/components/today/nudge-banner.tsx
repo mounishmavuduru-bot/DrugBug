@@ -8,7 +8,7 @@ import type { DoseWithMed } from "@/components/today/today-utils";
 /**
  * Predictive nudge (PRD §9.1/§10.3). When the AdherenceForecaster predicts a
  * pending dose is likely to be missed (pMiss > 0.5), surface a pre-emptive
- * reminder. Shows the model's confidence (the predicted miss probability).
+ * reminder as a quiet ruled banner. Shows the model's predicted miss likelihood.
  */
 export function NudgeBanner({
   row,
@@ -23,30 +23,32 @@ export function NudgeBanner({
   const medName = row.med?.name ?? "your next dose";
 
   return (
-    <div className="rounded-[var(--radius)] border border-warning/40 bg-warning/10 p-3">
-      <div className="flex items-start gap-2.5">
-        <BellRing className="mt-0.5 size-4 shrink-0 text-warning" />
+    <div className="border-y border-rule-strong bg-monitor-tint/40 px-4 py-3">
+      <div className="flex items-start gap-3">
+        <BellRing className="mt-0.5 size-4 shrink-0 text-monitor" strokeWidth={1.75} aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-text">
-            You may be at risk of missing this dose
+          <p className="flex items-baseline gap-2 text-sm font-medium text-ink">
+            Easy one to forget
+            <span className="label-mono tnum text-xs font-normal text-monitor">
+              ~{pct}% miss
+            </span>
           </p>
-          <p className="mt-0.5 text-xs text-muted">
-            <span className="mono text-text">{medName}</span> at{" "}
-            <span className="mono text-text">{clockTime(row.scheduledAt)}</span> —
-            predicted miss likelihood{" "}
-            <span className="mono text-warning">{pct}%</span>. Set yourself a
-            reminder so you don&apos;t skip it.
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            Your recent pattern says{" "}
+            <span className="label-mono text-ink">{medName}</span> at{" "}
+            <span className="label-mono text-ink">{clockTime(row.scheduledAt)}</span>{" "}
+            often slips. A reminder now would help.
           </p>
         </div>
         <button
           onClick={onDismiss}
           aria-label="Dismiss reminder"
-          className="rounded-md p-1 text-muted transition-fast hover:bg-elevated hover:text-text"
+          className="rounded-[var(--radius-sm)] p-1 text-muted transition-colors duration-150 ease-[var(--ease)] hover:bg-brand-tint hover:text-ink"
         >
-          <X className="size-4" />
+          <X className="size-4" strokeWidth={1.75} aria-hidden />
         </button>
       </div>
-      <DecisionSupportNote className="mt-2" />
+      <DecisionSupportNote className="mt-2 pl-7" />
     </div>
   );
 }

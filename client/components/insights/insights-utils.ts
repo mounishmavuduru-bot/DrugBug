@@ -9,21 +9,22 @@ import { tsToDate } from "@/lib/format";
 export const WINDOW_DAYS = 30;
 
 /**
- * Deterministic categorical palette for per-med series. Avoids the design-token
- * severity colors (reserved for clinical meaning) — these are purely categorical.
- * Index by a med's stable position in the active list so colors don't reshuffle.
+ * Deterministic categorical palette for per-med series, drawn from the Monograph
+ * palette only — ink, pharmacy green, and the earthy clinical signal hues plus a
+ * few muted neutrals. No rainbow, no neon, no violet/cyan. Index by a med's stable
+ * position in the active list so colors don't reshuffle between renders.
  */
 export const MED_PALETTE = [
-  "#06b6d4", // primary cyan
-  "#a78bfa", // violet
-  "#34d399", // emerald
-  "#fbbf24", // amber
-  "#f472b6", // pink
-  "#60a5fa", // blue
-  "#fb923c", // orange
-  "#4ade80", // green
-  "#e879f9", // fuchsia
-  "#2dd4bf", // teal
+  "#15402e", // brand — deep pharmacy green
+  "#936410", // monitor — ochre
+  "#b5521e", // caution — burnt orange
+  "#2f6d4f", // positive — moss green
+  "#a32a1a", // danger — brick
+  "#6a6052", // muted — warm grey
+  "#7a5a2c", // brown
+  "#4a5d3a", // olive
+  "#8a4a3a", // clay
+  "#3a4d52", // slate
 ] as const;
 
 export function colorForIndex(i: number): string {

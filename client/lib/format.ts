@@ -44,11 +44,11 @@ export type DoseStatus = "pending" | "taken" | "missed" | "skipped" | "late";
 
 export const doseStatusStyle: Record<
   DoseStatus,
-  { label: string; variant: "neutral" | "success" | "warning" | "danger" | "primary" }
+  { label: string; variant: "neutral" | "brand" | "positive" | "monitor" | "caution" | "danger" | "outline" }
 > = {
-  pending: { label: "Pending", variant: "primary" },
-  taken: { label: "Taken", variant: "success" },
-  late: { label: "Late", variant: "warning" },
+  pending: { label: "Due", variant: "outline" },
+  taken: { label: "Taken", variant: "positive" },
+  late: { label: "Late", variant: "caution" },
   missed: { label: "Missed", variant: "danger" },
   skipped: { label: "Skipped", variant: "neutral" },
 };

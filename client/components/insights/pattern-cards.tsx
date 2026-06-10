@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { TrendingDown, Link2, AlertCircle } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardEyebrow, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LoadingState, EmptyState, ErrorState } from "@/components/shared/states";
 import { Disclaimer } from "@/components/med/disclaimer";
@@ -20,10 +20,10 @@ type LoadState<T> =
   | { status: "error"; message: string };
 
 /** Strength descriptor for a correlation coefficient. */
-function strengthOf(r: number): { label: string; variant: "danger" | "warning" | "neutral" } {
+function strengthOf(r: number): { label: string; variant: "danger" | "caution" | "neutral" } {
   const a = Math.abs(r);
   if (a >= 0.7) return { label: "Strong", variant: "danger" };
-  if (a >= 0.4) return { label: "Moderate", variant: "warning" };
+  if (a >= 0.4) return { label: "Moderate", variant: "caution" };
   return { label: "Weak", variant: "neutral" };
 }
 
@@ -62,69 +62,75 @@ export function SideEffectPatternsCard({ identityHex }: { identityHex: string })
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Side-effect patterns</CardTitle>
-          <CardDescription>Statistical associations between doses and logged symptoms</CardDescription>
+          <CardEyebrow>Symptoms · patterns</CardEyebrow>
+          <CardTitle className="mt-1">Symptom and dose patterns</CardTitle>
+          <CardDescription>Symptoms that tend to follow a medication in your logs</CardDescription>
         </div>
-        <Badge variant="neutral">Correlational</Badge>
+        <Badge variant="neutral">Correlation</Badge>
       </CardHeader>
 
-      {state.status === "loading" ? (
-        <LoadingState label="Analyzing patterns…" />
-      ) : state.status === "error" ? (
-        <ErrorState
-          title="Patterns unavailable"
-          description={state.message}
-          retry={() => setReloadKey((k) => k + 1)}
-        />
-      ) : state.data.length === 0 ? (
-        <EmptyState
-          icon={Link2}
-          title="No significant associations yet"
-          description="As you log more doses and side effects, correlations will surface here."
-        />
-      ) : (
-        <ul className="space-y-2.5">
-          {state.data.map((p, i) => {
-            const s = strengthOf(p.r);
-            return (
-              <li
-                key={`${p.medication}-${p.symptom}-${i}`}
-                className="rounded-[var(--radius)] border border-border bg-elevated/40 p-3"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm text-text">
-                    <span className="font-medium">{p.symptom}</span>
-                    <span className="text-muted"> associate with </span>
-                    <span className="mono">{p.medication}</span>
-                  </p>
-                  <Badge variant={s.variant} className="shrink-0">
-                    {s.label}
-                  </Badge>
-                </div>
-                <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-                  <span>
-                    r = <span className="mono text-text">{p.r.toFixed(2)}</span>
-                  </span>
-                  <span>
-                    n = <span className="mono text-text">{p.n}</span>
-                  </span>
-                  {p.lagHours ? (
-                    <span>
-                      lag <span className="mono text-text">{p.lagHours}h</span>
-                    </span>
-                  ) : null}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <div className="px-4 py-4">
+        {state.status === "loading" ? (
+          <LoadingState rows={3} label="Looking for patterns…" />
+        ) : state.status === "error" ? (
+          <ErrorState
+            title="Couldn't check for patterns"
+            description={state.message}
+            retry={() => setReloadKey((k) => k + 1)}
+          />
+        ) : state.data.length === 0 ? (
+          <EmptyState
+            icon={Link2}
+            title="Nothing stands out yet"
+            description="As you log more doses and side effects, any symptom that consistently follows a medication will be listed here."
+          />
+        ) : (
+          <ul className="divide-y divide-rule border-y border-rule">
+            {state.data.map((p, i) => {
+              const s = strengthOf(p.r);
+              return (
+                <li
+                  key={`${p.medication}-${p.symptom}-${i}`}
+                  className="py-3 first:pt-0 last:pb-0"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm text-ink">
+                      <span className="label-mono">{p.medication}</span>
+                      <span className="text-muted"> is often followed by </span>
+                      {p.symptom}
+                    </p>
+                    <Badge variant={s.variant} className="shrink-0">
+                      {s.label}
+                    </Badge>
+                  </div>
+                  <dl className="mt-1.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs text-muted">
+                    <div className="flex items-baseline gap-1.5">
+                      <dt className="text-faint">r</dt>
+                      <dd className="label-mono tnum text-ink">{p.r.toFixed(2)}</dd>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <dt className="text-faint">logs</dt>
+                      <dd className="label-mono tnum text-ink">{p.n}</dd>
+                    </div>
+                    {p.lagHours ? (
+                      <div className="flex items-baseline gap-1.5">
+                        <dt className="text-faint">lag</dt>
+                        <dd className="label-mono tnum text-ink">{p.lagHours}h</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
-      <p className="mt-3 text-[11px] leading-snug text-muted">
-        These are correlations, not causal claims. Share them with your prescriber to
-        discuss whether a medication may be contributing to a symptom.
-      </p>
-      <Disclaimer className="mt-2" />
+        <p className="mt-3 text-[11px] leading-snug text-muted">
+          These are correlations from your own logs, not proof that a medication caused a
+          symptom. Bring them up with your prescriber to decide whether they're worth acting on.
+        </p>
+        <Disclaimer className="mt-2" />
+      </div>
     </Card>
   );
 }
@@ -176,49 +182,52 @@ export function ForecastCard({ identityHex }: { identityHex: string }) {
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Predicted upcoming misses</CardTitle>
-          <CardDescription>Scheduled doses at elevated risk of being missed</CardDescription>
+          <CardEyebrow>Forecast · miss risk</CardEyebrow>
+          <CardTitle className="mt-1">Doses you're likely to miss</CardTitle>
+          <CardDescription>Upcoming doses our model flags as above-average risk</CardDescription>
         </div>
-        <Badge variant="primary">Forecast</Badge>
+        <Badge variant="brand">Forecast</Badge>
       </CardHeader>
 
-      {state.status === "loading" ? (
-        <LoadingState label="Forecasting adherence…" />
-      ) : state.status === "error" ? (
-        <ErrorState
-          title="Forecast unavailable"
-          description={state.message}
-          retry={() => setReloadKey((k) => k + 1)}
-        />
-      ) : state.data.length === 0 ? (
-        <EmptyState
-          icon={TrendingDown}
-          title="No high-risk doses predicted"
-          description="No upcoming doses are above the miss-risk threshold right now."
-        />
-      ) : (
-        <ul className="space-y-2.5">
-          {state.data.map((f) => {
-            const pct = Math.round(f.pMiss * 100);
-            return (
-              <li
-                key={f.doseId}
-                className="flex items-center justify-between gap-2 rounded-[var(--radius)] border border-border bg-elevated/40 p-3"
-              >
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="size-4 shrink-0 text-warning" aria-hidden />
-                  <p className="text-sm text-text">{formatWhen(f.scheduledAt)}</p>
-                </div>
-                <Badge variant={pct >= 75 ? "danger" : "warning"} className="shrink-0">
-                  <span className="mono">{pct}%</span> miss risk
-                </Badge>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <div className="px-4 py-4">
+        {state.status === "loading" ? (
+          <LoadingState rows={3} label="Checking upcoming doses…" />
+        ) : state.status === "error" ? (
+          <ErrorState
+            title="Couldn't load the forecast"
+            description={state.message}
+            retry={() => setReloadKey((k) => k + 1)}
+          />
+        ) : state.data.length === 0 ? (
+          <EmptyState
+            icon={TrendingDown}
+            title="Nothing flagged right now"
+            description="None of your upcoming doses are above the miss-risk threshold."
+          />
+        ) : (
+          <ul className="divide-y divide-rule border-y border-rule">
+            {state.data.map((f) => {
+              const pct = Math.round(f.pMiss * 100);
+              return (
+                <li
+                  key={f.doseId}
+                  className="flex items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="size-4 shrink-0 text-monitor" aria-hidden />
+                    <p className="text-sm text-ink">{formatWhen(f.scheduledAt)}</p>
+                  </div>
+                  <Badge variant={pct >= 75 ? "danger" : "caution"} className="shrink-0">
+                    <span className="label-mono tnum">{pct}%</span> risk
+                  </Badge>
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
-      <Disclaimer className="mt-3" />
+        <Disclaimer className="mt-3" />
+      </div>
     </Card>
   );
 }
