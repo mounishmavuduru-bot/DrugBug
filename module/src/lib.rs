@@ -16,7 +16,12 @@
 
 mod auth;
 mod reducers;
-mod rls;
+// RLS read-filters live in src/rls.rs but are NOT compiled: spacetimedb 2.4.1's
+// `client_visibility_filter` is unstable, unenforced, and breaks the websocket
+// subscription path (clients hang on SubscribeApplied). Re-enable `mod rls;` (and
+// the `unstable` feature in Cargo.toml) once upstream ships RLS. Read-scoping is
+// done client-side by identity today; write-path authz (auth.rs) is enforced.
+// mod rls;
 mod scheduler;
 mod tables;
 mod util;

@@ -7,13 +7,15 @@ publish = false
 [lib]
 crate-type = ["cdylib"]
 
+# NOTE on Row-Level Security: spacetimedb 2.4.1 ships `client_visibility_filter`
+# only under the `unstable` feature AND does not yet enforce it at runtime — worse,
+# defining RLS filters breaks the websocket *subscription* path (SubscribeApplied
+# never fires), so clients hang. The RLS rules live in src/rls.rs (not compiled —
+# `mod rls;` is commented out in lib.rs) ready to re-enable once the platform lands
+# RLS. Until then, read-scoping is enforced client-side by identity and the
+# write-path authorization in auth.rs is fully enforced. See module/README.md.
 [dependencies]
-# `unstable` enables `client_visibility_filter` (Row-Level Security). NOTE: as of
-# spacetimedb 2.4.1 the RLS read-path is still being implemented upstream and is
-# not yet enforced at runtime — see module/README.md "Security note". The filters
-# in src/rls.rs are correct and become enforcing as the platform lands RLS;
-# write-path authorization (auth.rs) is fully enforced today.
-spacetimedb = { version = "2.4", features = ["unstable"] }
+spacetimedb = "2.4"
 log = "0.4"
 # Date arithmetic for dose-horizon materialization. No `clock` feature: the module
 # never reads the host clock directly (it uses `ctx.timestamp`), so this builds

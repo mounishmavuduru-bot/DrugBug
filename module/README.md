@@ -83,13 +83,16 @@ the `record_*` reducers require an allowlisted service identity. The scheduled
 reducers additionally require `ctx.sender() == ctx.database_identity()` so a client
 cannot spoof a scheduler tick.
 
-**Read-path (RLS) enforcement is NOT yet active.** All tables are declared `public`,
-and the `#[client_visibility_filter]` rules in `src/rls.rs` are written correctly —
-owner-sees-own + accepted-caregiver-sees-patient, with `push_subscriptions`
-self-only. But as of **spacetimedb 2.4.1** the RLS read-path is still being
-implemented upstream and is **not yet enforced at runtime**. The filters in
-`src/rls.rs` become enforcing automatically once the platform ships RLS — no code
-rewrite required.
+**Read-path (RLS) enforcement is NOT yet active — and is currently disabled in the
+build.** All tables are declared `public`. The `#[client_visibility_filter]` rules in
+`src/rls.rs` are written correctly (owner-sees-own + accepted-caregiver-sees-patient,
+`push_subscriptions` self-only), **but they are not compiled**: `mod rls;` is commented
+out in `src/lib.rs` and the `unstable` feature is off in `Cargo.toml`. Reason: as of
+**spacetimedb 2.4.1** RLS is unstable and **not enforced at runtime**, and worse,
+*defining* `client_visibility_filter` rules breaks the websocket subscription path —
+`SubscribeApplied` never fires, so clients hang on connect (observed: `isActive:true,
+subscription ready:false`). Re-enabling is a two-line change (uncomment `mod rls;` +
+restore `features = ["unstable"]`) once upstream ships enforcing RLS.
 
 **Implication for production PHI:** until upstream RLS is enforcing, a subscribing
 client could in principle read rows beyond its own. Before handling real PHI in
