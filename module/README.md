@@ -74,33 +74,34 @@ spacetime call drugbug grant_service_identity "${SERVICE_IDENTITY}" "inference-s
 See `inference/README.md` for the writeback reducer signatures and the SQL-HTTP
 read pattern the service uses to fetch a user's meds.
 
-## Security note — RLS read-enforcement is still landing upstream
+## Security note — RLS read-enforcement (owner-scoping ON; caregiver join deferred)
 
-**Write-path authorization IS enforced today.** Every mutating reducer calls
-`auth.rs` before touching a row: a caller may only mutate rows it owns (or where an
-accepted `caregiver_links` row grants sufficient `view`/`log`/`manage` access), and
-the `record_*` reducers require an allowlisted service identity. The scheduled
-reducers additionally require `ctx.sender() == ctx.database_identity()` so a client
-cannot spoof a scheduler tick.
+**Write-path authorization IS enforced.** Every mutating reducer calls `auth.rs`
+before touching a row: a caller may only mutate rows it owns (or where an accepted
+`caregiver_links` row grants sufficient `view`/`log`/`manage` access), and the
+`record_*` reducers require an allowlisted service identity. Scheduled reducers
+require `ctx.sender() == ctx.database_identity()` so a client cannot spoof a tick.
 
-**Read-path (RLS) enforcement is NOT yet active — and is currently disabled in the
-build.** All tables are declared `public`. The `#[client_visibility_filter]` rules in
-`src/rls.rs` are written correctly (owner-sees-own + accepted-caregiver-sees-patient,
-`push_subscriptions` self-only), **but they are not compiled**: `mod rls;` is commented
-out in `src/lib.rs` and the `unstable` feature is off in `Cargo.toml`. Reason: as of
-**spacetimedb 2.4.1** RLS is unstable and **not enforced at runtime**, and worse,
-*defining* `client_visibility_filter` rules breaks the websocket subscription path —
-`SubscribeApplied` never fires, so clients hang on connect (observed: `isActive:true,
-subscription ready:false`). Re-enabling is a two-line change (uncomment `mod rls;` +
-restore `features = ["unstable"]`) once upstream ships enforcing RLS.
+**Read-path (RLS) — owner-scoping IS enforced.** `src/rls.rs` defines
+`#[client_visibility_filter]` rules and `mod rls;` is compiled with the `unstable`
+feature. Verified on spacetimedb 2.4.1 (both local and maincloud): simple
+self-scoping filters (`WHERE owner_identity = :sender`) both **apply** (the
+subscription's `SubscribeApplied` fires) and **enforce** (a different identity
+subscribing to the same table receives zero rows). So a subscribing client can read
+only its own `profiles`/`medications`/`doses`/`side_effects`/`scans`/
+`interactions_cache`/`appointments`/`recall_alerts`/`push_subscriptions` rows, plus
+its own `caregiver_links` (as either party).
 
-**Implication for production PHI:** until upstream RLS is enforcing, a subscribing
-client could in principle read rows beyond its own. Before handling real PHI in
-production you must either (a) run on a SpacetimeDB version with RLS read-enforcement
-on, or (b) adopt a server-mediated read pattern (clients read through an authorized
-intermediary instead of subscribing directly to the public tables). This is an honest
-capability boundary, consistent with PRD §15 (least privilege) and the
-credential/GPU-gating posture in the root README.
+**Known limitation — caregiver cross-user read view is deferred.** The earlier
+JOIN-based caregiver filters (`... JOIN caregiver_links ... WHERE caregiver_identity
+= :sender`) break the websocket subscription path in 2.4.1 (`SubscribeApplied` never
+fires → clients hang). They are therefore omitted. Consequence: with owner-scoping
+RLS on, a caregiver subscribing to a *patient's* tables receives nothing — the
+caregiver dashboard's cross-user read view does not function until SpacetimeDB ships
+working join RLS (then re-add the `*_CAREGIVER` filters, which are kept in git
+history) or until caregiver reads are mediated server-side via the service identity.
+Caregiver invites/links themselves still work (the link filters are simple).
+This is the right trade for PHI safety: owner isolation is the critical property.
 
 ## Scheduler timers (`src/scheduler.rs`)
 

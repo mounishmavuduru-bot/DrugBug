@@ -21,7 +21,7 @@ mod reducers;
 // subscription path (clients hang on SubscribeApplied). Re-enable `mod rls;` (and
 // the `unstable` feature in Cargo.toml) once upstream ships RLS. Read-scoping is
 // done client-side by identity today; write-path authz (auth.rs) is enforced.
-// mod rls;
+mod rls;
 mod scheduler;
 mod tables;
 mod util;

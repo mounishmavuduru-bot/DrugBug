@@ -15,7 +15,7 @@ crate-type = ["cdylib"]
 # RLS. Until then, read-scoping is enforced client-side by identity and the
 # write-path authorization in auth.rs is fully enforced. See module/README.md.
 [dependencies]
-spacetimedb = "2.4"
+spacetimedb = { version = "2.4", features = ["unstable"] }
 log = "0.4"
 # Date arithmetic for dose-horizon materialization. No `clock` feature: the module
 # never reads the host clock directly (it uses `ctx.timestamp`), so this builds
