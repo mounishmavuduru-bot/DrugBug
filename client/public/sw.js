@@ -4,7 +4,7 @@
    payload is a JSON { title, body, url, tag }. */
 
 const SHELL_CACHE = "drugbug-shell-v1";
-const SHELL = ["/", "/today", "/manifest.webmanifest", "/icons/icon.svg"];
+const SHELL = ["/", "/today", "/manifest.webmanifest", "/icons/drugbug-192.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(SHELL_CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -31,8 +31,8 @@ self.addEventListener("push", (event) => {
       body: data.body || "",
       tag: data.tag,
       data: { url: data.url || "/today" },
-      icon: "/icons/icon.svg",
-      badge: "/icons/icon.svg",
+      icon: "/icons/drugbug-192.png",
+      badge: "/icons/drugbug-192.png",
     })
   );
 });

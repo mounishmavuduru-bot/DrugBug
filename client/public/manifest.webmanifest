@@ -1,5 +1,5 @@
 {
-  "name": "DrugBug — know what you take",
+  "name": "DrugBug \u2014 know what you take",
   "short_name": "DrugBug",
   "description": "A medication record that catches dangerous drug combinations, verifies your pills, and reads your pharmacogenomics.",
   "id": "/",
@@ -9,8 +9,22 @@
   "orientation": "portrait",
   "background_color": "#fdf6f6",
   "theme_color": "#9b1e4d",
-  "categories": ["medical", "health"],
+  "categories": [
+    "medical",
+    "health"
+  ],
   "icons": [
-    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    {
+      "src": "/icons/drugbug-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/drugbug-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }

@@ -34,7 +34,13 @@ export const metadata: Metadata = {
     "Tracks your medications and dose times, then warns you before a combination, a counterfeit, or your own genetics turns a routine prescription dangerous.",
   applicationName: "DrugBug",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icons/icon.svg", apple: "/icons/icon.svg" },
+  icons: {
+    icon: [
+      { url: "/icons/drugbug-64.png", sizes: "64x64", type: "image/png" },
+      { url: "/icons/drugbug-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/icons/drugbug-512.png",
+  },
   appleWebApp: { capable: true, statusBarStyle: "default", title: "DrugBug" },
   openGraph: {
     title: "DrugBug — know what you take",
